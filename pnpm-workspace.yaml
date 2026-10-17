@@ -1,0 +1,45 @@
+# pnpm workspace. The catalog pins one version per dependency; packages reference it with
+# "<dep>": "catalog:". Bump a version here, once.
+packages:
+  - "apps/*"
+  - "packages/*"
+
+catalog:
+  "zod": "4.3.6"
+  "hono": "4.12.3"
+  "@orpc/contract": "1.13.5"
+  "@orpc/server": "1.13.5"
+  "@orpc/openapi": "1.13.5"
+  "@orpc/client": "1.13.5"
+  "@orpc/openapi-client": "1.13.5"
+  "@orpc/tanstack-query": "1.13.5"
+  "better-auth": "1.4.18"
+  "@tailwindcss/vite": "4.1.18"
+  "tailwindcss": "4.1.18"
+  "@vitejs/plugin-react": "5.1.2"
+  "tsdown": "0.18.4"
+  "vite": "7.3.0"
+  "typescript": "5.9.3"
+  "wrangler": "4.110.0"
+  "vitest": "^4.1.9"
+  "jsdom": "^26.1.0"
+  "@testing-library/react": "^16.3.0"
+  "@testing-library/jest-dom": "^6.6.4"
+  "@testing-library/user-event": "^14.6.1"
+  "@types/node": "^26.0.0"
+
+# pnpm 12 refuses to install until every dependency with a lifecycle script is listed here.
+# true: the postinstall fetches/validates a platform binary the tool needs. false: not needed.
+allowBuilds:
+  esbuild: true
+  workerd: true
+  lefthook: true
+  "@tailwindcss/oxide": true
+  sharp: false
+  msw: false
+
+# TanStack Start's internal packages use caret ranges, so a fresh resolution drifts to releases
+# that require Vite 8. Pin the Vite plugin to the line the app's @tanstack/react-start was
+# verified with (web-hono pins react-start 1.159.0). Remove when upgrading to Vite 8.
+overrides:
+  "@tanstack/start-plugin-core": 1.159.0

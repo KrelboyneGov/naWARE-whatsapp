@@ -8,7 +8,7 @@ health check the release workflow probes.
 
 ```sh
 cp .env.example .env   # fill in DATABASE_URL (Neon) and BETTER_AUTH_SECRET
-bun run dev            # wrangler dev on http://localhost:3000
+pnpm run dev            # wrangler dev on http://localhost:3000
 ```
 
 Wrangler loads `.env` automatically. Never add a `vars` block to `wrangler.jsonc`.

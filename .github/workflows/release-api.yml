@@ -4,7 +4,7 @@ name: Release API
 # monorepos/worker-secrets-with-deploy.md). Ships apps/server-hono to the `server-hono-api` Worker
 # when an `api-v*.*.*` tag is pushed, or on manual dispatch from the Actions tab.
 #
-# `verify` runs the root `bun run verify` on the tagged SHA in a clean environment and `deploy`
+# `verify` runs the root `pnpm run verify` on the tagged SHA in a clean environment and `deploy`
 # needs it: nothing publishes without a green verification in front of it. Database migrations
 # run before the Worker deploy, and Worker secrets travel inside the same `wrangler deploy`
 # through --secrets-file (a separate `secret put` step deploys on its own and is refused once a
@@ -24,7 +24,6 @@ concurrency:
   cancel-in-progress: false
 
 env:
-  BUN_VERSION: 1.3.4
   # Mirrors workspaces.catalog.wrangler in the root package.json. Bump both together.
   WRANGLER_VERSION: 4.110.0
 
@@ -36,28 +35,27 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup Bun
-        uses: oven-sh/setup-bun@v2
-        with:
-          bun-version: ${{ env.BUN_VERSION }}
+      # Node and pnpm versions come from mise.toml, the same file developers use locally.
+      - name: Setup Node and pnpm (mise)
+        uses: jdx/mise-action@v2
 
-      - name: Cache bun dependencies
+      - name: Cache pnpm store
         uses: actions/cache@v4
         with:
-          path: ~/.bun/install/cache
-          key: ${{ runner.os }}-bun-${{ hashFiles('bun.lock') }}
+          path: ~/.local/share/pnpm/store
+          key: ${{ runner.os }}-pnpm-${{ hashFiles('pnpm-lock.yaml') }}
           restore-keys: |
-            ${{ runner.os }}-bun-
+            ${{ runner.os }}-pnpm-
 
       - name: Install dependencies
-        run: bun install --frozen-lockfile
+        run: pnpm install --frozen-lockfile
 
       - name: Verify (lint, format, package builds, types, tests)
-        run: bun run verify
+        run: pnpm run verify
 
       - name: Build API bundle
         working-directory: apps/server-hono
-        run: bun run build
+        run: pnpm run build
 
   deploy:
     name: Deploy API Worker
@@ -68,23 +66,22 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup Bun
-        uses: oven-sh/setup-bun@v2
-        with:
-          bun-version: ${{ env.BUN_VERSION }}
+      # Node and pnpm versions come from mise.toml, the same file developers use locally.
+      - name: Setup Node and pnpm (mise)
+        uses: jdx/mise-action@v2
 
       - name: Install dependencies
-        run: bun install --frozen-lockfile
+        run: pnpm install --frozen-lockfile
 
       - name: Build packages
-        run: bun run build --filter='@emergency-map/*'
+        run: pnpm run build --filter='@emergency-map/*'
 
       # drizzle-kit reads DATABASE_URL; migrations must use the direct (non-pooled) Neon string.
       - name: Run database migrations
         working-directory: packages/infra-db
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL_DIRECT }}
-        run: bun run db:migrate
+        run: pnpm run db:migrate
 
       # jq escapes quotes and backslashes; empty values are dropped so a missing GitHub secret
       # keeps the Worker's last good value instead of blanking it (--secrets-file is additive).
@@ -108,7 +105,7 @@ jobs:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           wranglerVersion: ${{ env.WRANGLER_VERSION }}
-          packageManager: bun
+          packageManager: pnpm
           workingDirectory: apps/server-hono
           command: deploy --secrets-file worker-secrets.json
 

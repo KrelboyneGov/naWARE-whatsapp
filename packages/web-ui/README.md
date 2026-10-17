@@ -7,7 +7,7 @@ Shared UI component library for the emergency-map monorepo.
 This package is part of the monorepo workspace. Install dependencies:
 
 ```bash
-bun install
+pnpm install
 ```
 
 ## Development
@@ -15,13 +15,13 @@ bun install
 Build the library:
 
 ```bash
-bun run build
+pnpm run build
 ```
 
 Watch mode for development:
 
 ```bash
-bun run dev
+pnpm run dev
 ```
 
 The build process uses Vite to:

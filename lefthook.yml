@@ -8,11 +8,11 @@ pre-commit:
   jobs:
     - name: format
       glob: "*.{js,jsx,cjs,mjs,ts,tsx,cts,mts,json,jsonc,css,md,mdx}"
-      run: bunx oxfmt --write {staged_files}
+      run: pnpm exec oxfmt --write {staged_files}
       stage_fixed: true
     - name: lint
       glob: "*.{js,jsx,cjs,mjs,ts,tsx,cts,mts}"
-      run: bunx oxlint {staged_files}
+      run: pnpm exec oxlint {staged_files}
 
 commit-msg:
   skip:
@@ -29,8 +29,8 @@ commit-msg:
         exit 1
 
 # pre-push is the first of the three verification tiers (docs/adr/0001-release-pipeline.md):
-# the same `bun run verify` every release workflow runs on the tagged SHA before deploying.
+# the same `pnpm run verify` every release workflow runs on the tagged SHA before deploying.
 pre-push:
   jobs:
     - name: verify
-      run: bun run verify
+      run: pnpm run verify

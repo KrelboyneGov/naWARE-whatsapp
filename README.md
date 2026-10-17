@@ -5,7 +5,8 @@ read official warnings, and find organizations or communities to receive help fr
 with. Product context: [`docs/product-brief.md`](./docs/product-brief.md).
 
 Monorepo scaffolded from [monorepo-template](https://github.com/niway-dev/monorepo-template)
-(Client-Server Hono pattern): TypeScript, Bun, Turborepo, DDD + Hexagonal Architecture.
+(Client-Server Hono pattern): TypeScript, pnpm, Turborepo, DDD + Hexagonal Architecture.
+The template is Bun-native; this repository switched to pnpm ([ADR 0002](./docs/adr/0002-pnpm-and-mise.md)).
 
 ## Stack
 
@@ -20,12 +21,16 @@ Monorepo scaffolded from [monorepo-template](https://github.com/niway-dev/monore
 
 ## Getting started
 
+Toolchain versions (Node, pnpm) are pinned in `mise.toml`; [mise](https://mise.jdx.dev) installs
+them locally and in CI from the same file.
+
 ```bash
-bun install
+mise install
+pnpm install
 # apps/server-hono/.env  -> DATABASE_URL, DATABASE_URL_DIRECT, BETTER_AUTH_SECRET, CORS_ORIGIN
 # apps/web-hono/.env     -> VITE_SERVER_URL (http://localhost:3000 in dev)
-bun run db:push   # local iteration; commit schema changes with db:generate
-bun run dev       # API on :3000, web on :3001
+pnpm run db:push   # local iteration; commit schema changes with db:generate
+pnpm run dev       # API on :3000, web on :3001
 ```
 
 Copy each app's `.env.example` to `.env` if it does not exist yet.
@@ -51,10 +56,10 @@ Dependency rule: `domain <- application <- infra-*`; only apps wire them togethe
 
 ## Scripts
 
-- `bun run dev` — both apps · `dev:server-hono` / `dev:web-hono` — one app
-- `bun run verify` — lint, format check, package builds, type-check, tests (pre-push runs it)
-- `bun run build` · `check-types` · `test` · `lint` · `format`
-- `bun run db:push` · `db:generate` · `db:migrate` · `db:studio`
+- `pnpm run dev` — both apps · `dev:server-hono` / `dev:web-hono` — one app
+- `pnpm run verify` — lint, format check, package builds, type-check, tests (pre-push runs it)
+- `pnpm run build` · `check-types` · `test` · `lint` · `format`
+- `pnpm run db:push` · `db:generate` · `db:migrate` · `db:studio`
 
 ## Deployment
 
@@ -66,7 +71,7 @@ git tag web-v0.1.0 && git push origin web-v0.1.0   # .github/workflows/release-w
 ```
 
 Required secrets, variables and first-deploy order: [`docs/deployment.md`](./docs/deployment.md).
-Decision record: [`docs/adr/0001-release-pipeline.md`](./docs/adr/0001-release-pipeline.md).
+Decision records: [`docs/adr/`](./docs/adr/).
 
 ## Documentation
 

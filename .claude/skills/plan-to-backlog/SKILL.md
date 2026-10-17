@@ -57,7 +57,7 @@ Update these values to match your project's documentation setup.
 - **Runner rules** (copy into every epic): read epic + own doc first; verify
   Preconditions or STOP and report; integration branch named in the plan —
   sequential commits there, parallel runs branch `feat/<epic-short>-p<N>` and merge
-  back; commands from the app dir, runner **bun** (`bun test`, `bunx tsc --noEmit`);
+  back; commands from the app dir, runner **pnpm** (`pnpm test`, `pnpm exec tsc --noEmit`);
   pre-commit hook reformats staged files (normal); conventional commits with the
   co-author line; update status in the index map + own doc when done.
 - **Statuses:** 🔵 Propuesto → 🟡 En progreso → 🟢 Hecho; epic goes
@@ -66,7 +66,7 @@ Update these values to match your project's documentation setup.
 ## Verification (before committing)
 
 ```bash
-cd apps/documentation && bun run build   # all pages build, new docs included
+cd apps/documentation && pnpm run build   # all pages build, new docs included
 ```
 
 Then check: every deliverable link in the epic table resolves to a created file;

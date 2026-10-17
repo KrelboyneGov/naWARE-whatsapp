@@ -52,7 +52,8 @@ After that, the two ship independently in any order.
 
 ## What a release does
 
-1. `verify` — checkout the tagged SHA, `bun install --frozen-lockfile`, `bun run verify`
+1. `verify` — checkout the tagged SHA, install Node and pnpm from `mise.toml` (`jdx/mise-action`),
+   `pnpm install --frozen-lockfile`, `pnpm run verify`
    (lint, format check, package builds, type-check, tests), build the app bundle.
 2. `deploy` (needs `verify`, environment `production`):
    - API: run `db:migrate` with `DATABASE_URL_DIRECT`, write `worker-secrets.json`
@@ -67,8 +68,8 @@ before writing the file.
 
 ## Database migrations
 
-- Local iteration: `bun run db:push` (reads `apps/server-hono/.env`).
-- Shipping a schema change: `bun run db:generate`, commit the files under
+- Local iteration: `pnpm run db:push` (reads `apps/server-hono/.env`).
+- Shipping a schema change: `pnpm run db:generate`, commit the files under
   `packages/infra-db/src/migrations/`, release the API. The release applies them before the
   Worker deploy.
 - Neon branches are the recommended way to try a migration against production-shaped data.
@@ -76,9 +77,10 @@ before writing the file.
 ## Local development
 
 ```bash
+mise install   # Node + pnpm from mise.toml
 cp apps/server-hono/.env.example apps/server-hono/.env   # DATABASE_URL, DATABASE_URL_DIRECT, BETTER_AUTH_SECRET, CORS_ORIGIN=http://localhost:3001
 cp apps/web-hono/.env.example apps/web-hono/.env         # VITE_SERVER_URL=http://localhost:3000
-bun install && bun run db:push && bun run dev
+pnpm install && pnpm run db:push && pnpm run dev
 ```
 
 Wrangler loads `.env` automatically. Never add a `vars` block to a `wrangler.jsonc`.

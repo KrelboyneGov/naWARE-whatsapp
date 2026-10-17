@@ -24,12 +24,12 @@ The repository has one owner and no branch protection at this stage.
    `release-web.yml` on `web-v*.*.*` tags. Both also accept `workflow_dispatch`. There is no
    `production` branch.
 2. **Every release has a `verify` job that `deploy` needs.** `verify` runs the root
-   `bun run verify` (lint, format check, package builds, type-check, tests) on the tagged SHA and
+   `pnpm run verify` (lint, format check, package builds, type-check, tests) on the tagged SHA and
    builds the app bundle. The same script runs in the Lefthook pre-push hook.
 3. **Worker secrets ship inside the deploy** through `wrangler deploy --secrets-file`, written
    with `jq` for one step and removed with `if: always()`. Empty values are dropped so a missing
    GitHub secret never blanks a production value.
-4. **Wrangler is pinned twice, on purpose:** in the root catalog and as `WRANGLER_VERSION` in each
+4. **Wrangler is pinned twice, on purpose:** in the pnpm-workspace.yaml catalog and as `WRANGLER_VERSION` in each
    workflow, and bumped together.
 5. **Database migrations run in the API release**, before the Worker deploy, against the direct
    Neon connection string. Local iteration may use `db:push`; anything that ships is a committed

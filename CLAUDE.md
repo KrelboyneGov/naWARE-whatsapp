@@ -4,7 +4,7 @@ Emergency and aid map for Peru: a web platform that shows official weather warni
 emergencies and available help on a national map. Product context lives in
 `docs/product-brief.md`; deployment in `docs/deployment.md`; durable decisions in `docs/adr/`.
 
-Monorepo (Bun workspaces + Turborepo, TypeScript) with DDD + Hexagonal Architecture, scaffolded
+Monorepo (pnpm workspaces + Turborepo, TypeScript) with DDD + Hexagonal Architecture, scaffolded
 from [monorepo-template](https://github.com/niway-dev/monorepo-template) (Client-Server Hono pattern).
 
 ## Layout
@@ -42,28 +42,39 @@ Key topics (don't re-document them here):
 
 ## Project-specific rules
 
+- **Package manager is pnpm, toolchain comes from mise:** `mise.toml` pins Node and pnpm and is
+  read by developers (`mise install`) and by CI (`jdx/mise-action`). Dependency versions are pinned
+  once in the `catalog` of `pnpm-workspace.yaml`; packages reference them with `catalog:`. pnpm 12
+  refuses to install when a dependency with a lifecycle script is not listed under `allowBuilds`
+  there. Never run `bun`/`npm`/`yarn` here. Why pnpm over the template's Bun:
+  `docs/adr/0002-pnpm-and-mise.md`.
+- **Pinned TanStack Start line (sharp gotcha):** `apps/web-hono` pins `@tanstack/react-start`
+  1.159.0 and `@cloudflare/vite-plugin` 1.23.1, and `pnpm-workspace.yaml` overrides
+  `@tanstack/start-plugin-core` to 1.159.0. Newer lines require Vite 8; a fresh resolution without
+  those pins breaks `vite build` with "Could not resolve entry module index.html". Lift the pins
+  together with a Vite 8 upgrade.
 - **Skill Configuration:** Skills in `.claude/skills/` may have a **Configuration** table with paths.
   If a configured path no longer matches the project, update the table directly.
 - **Env / Wrangler (sharp gotcha):** ALWAYS use `.env` (and `.dev.vars` for local Worker secrets).
   NEVER add a `vars` / `[vars]` / `[env.*]` block to `wrangler.jsonc` — Wrangler auto-loads `.env`,
-  so a `vars` block drifts from the single source of truth. Wrangler is pinned in the root catalog
+  so a `vars` block drifts from the single source of truth. Wrangler is pinned in the pnpm-workspace.yaml catalog
   and mirrored as `WRANGLER_VERSION` in the release workflows; bump both together. Keep
   `compatibility_date` identical across both `wrangler.jsonc`, and run `wrangler types` after
   editing one.
 - **Production secrets ship with the deploy:** the release workflows write a `worker-secrets.json`
   and pass `--secrets-file` to `wrangler deploy`. Never add a `wrangler secret put` step or the
   action's `secrets:` input. `worker-secrets.json` is gitignored.
-- **`bun run verify` is the one definition of green:** lint, format check, package builds,
+- **`pnpm run verify` is the one definition of green:** lint, format check, package builds,
   type-check, tests. The Lefthook pre-push runs it, and both release workflows run it in a `verify`
   job that `deploy` needs. No workflow runs on pull requests (`docs/adr/0001-release-pipeline.md`).
   Change the checks in `verify`, never in one caller.
-- **Schema changes ship as migrations:** `bun run db:push` is for local iteration only. Commit a
-  migration with `bun run db:generate` (files under `packages/infra-db/src/migrations/`); the API
+- **Schema changes ship as migrations:** `pnpm run db:push` is for local iteration only. Commit a
+  migration with `pnpm run db:generate` (files under `packages/infra-db/src/migrations/`); the API
   release applies them with `db:migrate` before deploying the Worker.
 - **Table prefix:** every table is created through `createTable` (`packages/infra-db/src/utils/`)
   and gets the `emergency_map_` prefix from `TABLE_PREFIX`.
 - **web-ui needs `dist/`:** `@emergency-map/web-ui` exports point to built files, and `dist/` is
-  NOT committed. Run `bun run build --filter='@emergency-map/*'` before `bun run check-types`, or the
+  NOT committed. Run `pnpm run build --filter='@emergency-map/*'` before `pnpm run check-types`, or the
   web app fails with "Cannot find module". Rebuild after editing web-ui components.
 - **Data invariants from the brief** (apply when modelling sources and events): keep each
   issuer's own severity level and legend, never a merged "risk score"; a record located only at
@@ -73,6 +84,7 @@ Key topics (don't re-document them here):
 
 ## Common Commands
 
-- `bun run dev` — both apps · `bun run dev:server-hono` / `dev:web-hono` — one app
-- `bun run verify` — the full green check
-- `bun run db:push` / `db:generate` / `db:migrate` / `db:studio` — run from the monorepo root
+- `mise install && pnpm install` — toolchain and dependencies
+- `pnpm run dev` — both apps · `pnpm run dev:server-hono` / `dev:web-hono` — one app
+- `pnpm run verify` — the full green check
+- `pnpm run db:push` / `db:generate` / `db:migrate` / `db:studio` — run from the monorepo root

@@ -48,19 +48,19 @@ import type { ObjectProperties } from "@emergency-map/domain/types";
 ### Build
 
 ```bash
-bun run build
+pnpm run build
 ```
 
 ### Watch Mode
 
 ```bash
-bun run dev:watch
+pnpm run dev:watch
 ```
 
 ### Type Check
 
 ```bash
-bun run check-types
+pnpm run check-types
 ```
 
 ## Constants Pattern
