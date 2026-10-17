@@ -36,7 +36,7 @@
     "zod": "catalog:"
   },
   "devDependencies": {
-    "@cloudflare/vite-plugin": "1.23.1",
+    "@cloudflare/vite-plugin": "1.44.0",
     "@emergency-map/config": "workspace:*",
     "@emergency-map/web-ui": "workspace:*",
     "@tailwindcss/vite": "catalog:",

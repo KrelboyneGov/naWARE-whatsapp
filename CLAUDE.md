@@ -49,10 +49,18 @@ Key topics (don't re-document them here):
   there. Never run `bun`/`npm`/`yarn` here. Why pnpm over the template's Bun:
   `docs/adr/0002-pnpm-and-mise.md`.
 - **Pinned TanStack Start line (sharp gotcha):** `apps/web-hono` pins `@tanstack/react-start`
-  1.159.0 and `@cloudflare/vite-plugin` 1.23.1, and `pnpm-workspace.yaml` overrides
-  `@tanstack/start-plugin-core` to 1.159.0. Newer lines require Vite 8; a fresh resolution without
-  those pins breaks `vite build` with "Could not resolve entry module index.html". Lift the pins
-  together with a Vite 8 upgrade.
+  1.159.0 and `pnpm-workspace.yaml` overrides `@tanstack/start-plugin-core` to 1.159.0. Newer
+  lines require Vite 8; a fresh resolution without those pins breaks `vite build` with "Could not
+  resolve entry module index.html". Lift the pins together with a Vite 8 upgrade.
+- **`@cloudflare/vite-plugin` must pair with the Wrangler in the catalog (sharp gotcha):** the
+  plugin bundles its own Miniflare, and `wrangler dev` (API) uses Wrangler's. When the two Miniflare
+  versions differ they write the local dev registry in incompatible formats, the web Worker's
+  `API_SERVICE` binding cannot reach the API, and every proxied request fails with
+  "Network connection lost" while `curl localhost:3000` works. Pick the plugin version whose
+  `dependencies.miniflare` equals `wrangler@<catalog>`'s (`pnpm view ... dependencies.miniflare`);
+  today wrangler 4.110.0 ↔ plugin 1.44.0. Bump both in the same commit.
+- **Neon connection strings are the bare URL:** Neon's console offers a `psql '...'` snippet;
+  paste only the `postgresql://...` part into `.env`, or `neon()` fails with "not a valid URL".
 - **Skill Configuration:** Skills in `.claude/skills/` may have a **Configuration** table with paths.
   If a configured path no longer matches the project, update the table directly.
 - **Env / Wrangler (sharp gotcha):** ALWAYS use `.env` (and `.dev.vars` for local Worker secrets).
