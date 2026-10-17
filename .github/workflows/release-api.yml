@@ -1,0 +1,125 @@
+name: Release API
+
+# Tier: release (docs/adr/0001-release-pipeline.md; hub: monorepos/release-gated-verification.md R1,
+# monorepos/worker-secrets-with-deploy.md). Ships apps/server-hono to the `server-hono-api` Worker
+# when an `api-v*.*.*` tag is pushed, or on manual dispatch from the Actions tab.
+#
+# `verify` runs the root `bun run verify` on the tagged SHA in a clean environment and `deploy`
+# needs it: nothing publishes without a green verification in front of it. Database migrations
+# run before the Worker deploy, and Worker secrets travel inside the same `wrangler deploy`
+# through --secrets-file (a separate `secret put` step deploys on its own and is refused once a
+# version was uploaded without being deployed).
+#
+# Reopen: when a second deployable environment (staging) is needed, add a job keyed on a tag
+# prefix (`api-staging-v*`) or on the dispatch input, never on a long-lived branch.
+
+on:
+  push:
+    tags:
+      - "api-v*.*.*"
+  workflow_dispatch:
+
+concurrency:
+  group: release-api
+  cancel-in-progress: false
+
+env:
+  BUN_VERSION: 1.3.4
+  # Mirrors workspaces.catalog.wrangler in the root package.json. Bump both together.
+  WRANGLER_VERSION: 4.110.0
+
+jobs:
+  verify:
+    name: Verify
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: ${{ env.BUN_VERSION }}
+
+      - name: Cache bun dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.bun/install/cache
+          key: ${{ runner.os }}-bun-${{ hashFiles('bun.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-bun-
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Verify (lint, format, package builds, types, tests)
+        run: bun run verify
+
+      - name: Build API bundle
+        working-directory: apps/server-hono
+        run: bun run build
+
+  deploy:
+    name: Deploy API Worker
+    needs: verify
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: ${{ env.BUN_VERSION }}
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Build packages
+        run: bun run build --filter='@emergency-map/*'
+
+      # drizzle-kit reads DATABASE_URL; migrations must use the direct (non-pooled) Neon string.
+      - name: Run database migrations
+        working-directory: packages/infra-db
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL_DIRECT }}
+        run: bun run db:migrate
+
+      # jq escapes quotes and backslashes; empty values are dropped so a missing GitHub secret
+      # keeps the Worker's last good value instead of blanking it (--secrets-file is additive).
+      - name: Write Worker secrets file
+        working-directory: apps/server-hono
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          BETTER_AUTH_SECRET: ${{ secrets.BETTER_AUTH_SECRET }}
+          CORS_ORIGIN: ${{ vars.CORS_ORIGIN }}
+        run: |
+          umask 077
+          jq -n \
+            --arg DATABASE_URL "$DATABASE_URL" \
+            --arg BETTER_AUTH_SECRET "$BETTER_AUTH_SECRET" \
+            --arg CORS_ORIGIN "$CORS_ORIGIN" \
+            '$ARGS.named | with_entries(select(.value != ""))' > worker-secrets.json
+
+      - name: Deploy to Cloudflare Workers
+        uses: cloudflare/wrangler-action@v3.14.1
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          wranglerVersion: ${{ env.WRANGLER_VERSION }}
+          packageManager: bun
+          workingDirectory: apps/server-hono
+          command: deploy --secrets-file worker-secrets.json
+
+      - name: Remove Worker secrets file
+        if: always()
+        run: rm -f apps/server-hono/worker-secrets.json
+
+      # Optional: set the repository variable API_URL (e.g. https://server-hono-api.<account>.workers.dev)
+      # to probe the health endpoint after the deploy.
+      - name: Smoke check
+        if: vars.API_URL != ''
+        env:
+          API_URL: ${{ vars.API_URL }}
+        run: curl --fail --silent --show-error --max-time 20 "$API_URL/api/v1/health"
