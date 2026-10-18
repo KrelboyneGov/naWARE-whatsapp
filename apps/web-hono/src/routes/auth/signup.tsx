@@ -1,27 +1,41 @@
-import { createFileRoute, Link, redirect } from "@tanstack/react-router";
+import { createFileRoute, Link, redirect as redirectTo } from "@tanstack/react-router";
+import z from "zod";
 
 import SignUpForm from "@/components/sign-up-form";
+import { AuthCard } from "@/components/layout/auth-card";
+import { safeRedirect } from "@/lib/safe-redirect";
 
 export const Route = createFileRoute("/auth/signup")({
-  component: SignUpPage,
+  validateSearch: z.object({ redirect: z.string().optional() }),
+  component: Page,
+  head: () => ({ meta: [{ title: "Crear cuenta · Andes Alerta" }] }),
   beforeLoad: async (ctx) => {
-    const { isAuthenticated } = ctx.context;
-    if (isAuthenticated) {
-      throw redirect({ to: "/todos" });
+    if (ctx.context.isAuthenticated) {
+      throw redirectTo({ to: safeRedirect(ctx.search.redirect) });
     }
   },
 });
 
-function SignUpPage() {
+function Page() {
+  const { redirect } = Route.useSearch();
   return (
-    <div className="mx-auto w-full mt-10 max-w-md p-6">
-      <SignUpForm />
-      <div className="mt-4 text-center text-sm text-muted-foreground">
-        Already have an account?{" "}
-        <Link to="/auth/login" className="text-primary hover:underline">
-          Sign In
-        </Link>
-      </div>
-    </div>
+    <AuthCard
+      title="Crea tu cuenta"
+      subtitle="Una cuenta te permite reportar eventos y aportar evidencia. Para explorar el mapa no la necesitas."
+      footer={
+        <>
+          ¿Ya tienes cuenta?{" "}
+          <Link
+            to="/auth/login"
+            search={{ redirect }}
+            className="font-medium text-primary hover:underline"
+          >
+            Ingresar
+          </Link>
+        </>
+      }
+    >
+      <SignUpForm redirectTo={safeRedirect(redirect)} />
+    </AuthCard>
   );
 }

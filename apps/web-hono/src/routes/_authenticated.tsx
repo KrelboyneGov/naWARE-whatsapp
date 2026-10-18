@@ -5,7 +5,7 @@ export const Route = createFileRoute("/_authenticated")({
     const { isAuthenticated } = ctx.context;
 
     if (!isAuthenticated) {
-      throw redirect({ to: "/auth/login" });
+      throw redirect({ to: "/auth/login", search: { redirect: ctx.location.href } });
     }
   },
 });

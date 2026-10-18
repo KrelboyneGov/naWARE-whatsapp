@@ -9,8 +9,10 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
   Button,
+  buttonVariants,
 } from "@emergency-map/web-ui";
 import { useSignOut } from "@/hooks/use-session";
+import { cn } from "@/lib/utils";
 import type { AuthSession } from "@/lib/auth/types";
 
 interface UserMenuProps {
@@ -24,22 +26,29 @@ export default function UserMenu({ userName, userEmail, isAuthenticated }: UserM
 
   if (!isAuthenticated) {
     return (
-      <Link to="/auth/login">
-        <Button variant="outline">Sign In</Button>
+      <Link
+        to="/auth/login"
+        className={cn(buttonVariants({ variant: "outline" }), "h-10 px-4 text-sm font-medium")}
+      >
+        Ingresar
       </Link>
     );
   }
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger render={<Button variant="outline" />}>{userName}</DropdownMenuTrigger>
-      <DropdownMenuContent className="bg-card min-w-[240px]">
+      <DropdownMenuTrigger
+        render={<Button variant="outline" className="h-10 max-w-48 px-4 text-sm" />}
+      >
+        <span className="truncate">{userName}</span>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent className="min-w-[240px] bg-card">
         <DropdownMenuGroup>
-          <DropdownMenuLabel>My Account</DropdownMenuLabel>
+          <DropdownMenuLabel>Mi cuenta</DropdownMenuLabel>
           <DropdownMenuSeparator />
           <DropdownMenuItem>{userEmail}</DropdownMenuItem>
           <DropdownMenuItem variant="destructive" onClick={() => signOut.mutate()}>
-            Sign Out
+            Cerrar sesión
           </DropdownMenuItem>
         </DropdownMenuGroup>
       </DropdownMenuContent>
