@@ -19,6 +19,7 @@ import type {
 } from "@emergency-map/domain/schemas";
 import type { ActivityType } from "@emergency-map/domain/constants";
 import { ACTIVITY_LABELS, ACTOR_ROLE_LABELS } from "@/components/history/activity-labels";
+import { loadCommunitySnapshot } from "@/lib/community-source";
 import { DEMO_DECISIONS, DEMO_EVIDENCE } from "./demo-detail";
 
 /** One line of "Qué cambió". Built from versions, evidence and public decisions only. */
@@ -106,7 +107,9 @@ async function fetchEventDetail(id: string): Promise<EventDetailResult> {
   const pending = DEMO_PENDING_EVENTS.find((e) => e.id === id);
   if (pending) return { status: "restricted" };
 
-  const event = DEMO_EVENTS.find((e) => e.id === id);
+  const event =
+    DEMO_EVENTS.find((e) => e.id === id) ??
+    (await loadCommunitySnapshot()).quickReportEvents.find((e) => e.id === id);
   if (!event) return { status: "not_found" };
   if (event.publicationStatus === "merged") {
     return { status: "merged", mainEventId: event.mergedIntoEventId };

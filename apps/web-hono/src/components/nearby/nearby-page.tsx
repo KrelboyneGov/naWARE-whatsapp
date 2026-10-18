@@ -6,6 +6,8 @@ import { NEARBY_RADII_KM, DEFAULT_NEARBY_RADIUS_KM } from "@emergency-map/domain
 import type { GeoPoint } from "@emergency-map/domain/schemas";
 import { CATEGORY_ICONS, DemoBadge, EmptyState, ReviewBadge } from "@/components/event";
 import { CATEGORY_LABELS, formatDateTime, formatRelative } from "@/lib/labels";
+import { EventCommunityBadge } from "@/components/signals/community-badge";
+import { WeatherCard } from "@/components/weather/weather-card";
 import { GPS_PROBLEM_COPY, useGeolocation, type GpsReading } from "./use-geolocation";
 import {
   computeNearby,
@@ -16,6 +18,9 @@ import {
 } from "./use-nearby";
 
 const NearbyMap = lazy(() => import("./nearby-map"));
+
+/** Dev seed example: the Chorrillos scenario of the demo dataset. */
+const CHORRILLOS_POINT: GeoPoint = { lat: -12.1697, lng: -77.0153 };
 
 const TABS: Array<{ value: NearbyTab; label: string }> = [
   { value: "events", label: "Eventos" },
@@ -128,6 +133,16 @@ export function NearbyPage() {
               >
                 <MapPin aria-hidden /> Elegir un punto
               </Button>
+              <Button
+                size="lg"
+                variant="ghost"
+                onClick={() => {
+                  setOrigin({ point: CHORRILLOS_POINT, source: "manual", at: new Date() });
+                  gps.clear();
+                }}
+              >
+                Probar en Chorrillos (demo)
+              </Button>
             </div>
             {gps.problem && (
               <div
@@ -181,6 +196,7 @@ export function NearbyPage() {
                   Cambiar
                 </Button>
               </div>
+              <WeatherCard point={origin.point} placeName="tu zona" />
               <div className="flex items-center gap-2.5">
                 <span id="radius-label" className="text-[13px] text-[var(--text-secondary)]">
                   Radio
@@ -340,6 +356,7 @@ function ResultRow({ row, now }: { row: NearbyRow; now: Date }) {
           {e.place.precision !== "exact" ? " · ubicación aproximada" : ""}
         </span>
         <span className="flex flex-wrap items-center gap-1.5">
+          <EventCommunityBadge eventId={e.id} now={now} />
           <ReviewBadge status={e.reviewStatus} />
           {e.isDemo && <DemoBadge />}
         </span>

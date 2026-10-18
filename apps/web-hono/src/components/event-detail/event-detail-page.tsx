@@ -18,6 +18,7 @@ import { formatLocality, formatOccurred } from "./format";
 import { ReportIssueDialog } from "./report-issue-dialog";
 import { SituationBadge } from "./situation-badge";
 import { SpecialState } from "./special-state";
+import { SignalBar } from "@/components/signals/signal-bar";
 import { useEventDetail, type EventDetailData } from "./use-event-detail";
 
 // MapLibre touches `window`: load it only in the browser.
@@ -176,6 +177,11 @@ function EventDetailView({
 }) {
   const { event, evidence, decisions, sources, needs, changes, now, districtCentroid } = data;
   const [contributeOpen, setContributeOpen] = useState(false);
+  // "#aportar" (from Urgencias) opens the evidence sheet directly.
+  useEffect(() => {
+    if (typeof window !== "undefined" && window.location.hash === "#aportar")
+      setContributeOpen(true);
+  }, []);
   const [issueOpen, setIssueOpen] = useState(false);
   const [shareMsg, setShareMsg] = useState<string | null>(null);
   const [mounted, setMounted] = useState(false);
@@ -316,6 +322,8 @@ function EventDetailView({
               {shareMsg}
             </p>
           )}
+
+          <SignalBar eventId={event.id} now={now} />
 
           <section className="grid gap-2" aria-labelledby="que-se-sabe">
             <h2 id="que-se-sabe" className={h2}>
