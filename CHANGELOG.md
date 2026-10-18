@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.0.1](https://github.com/csdev19/naWARE/compare/v1.0.0...v1.0.1) (2026-10-18)
+
+
+### Bug Fixes
+
+* **ci:** exclude release-please generated files from the format check ([8c9c889](https://github.com/csdev19/naWARE/commit/8c9c889cac2802a0cbcb4530568187fb13728f66))
+* **ci:** exclude release-please generated files from the format check ([aacc881](https://github.com/csdev19/naWARE/commit/aacc881b58c56f24088186ac1367230430dfcf7e))
+
 ## 1.0.0 (2026-10-18)
 
 
