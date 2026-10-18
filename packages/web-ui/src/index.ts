@@ -22,6 +22,6 @@ export * from "./components/alert-dialog";
 export * from "./lib/utils";
 export * from "./lib/normalize-markdown";
 
-import "./styles.css";
-
-// import "./components/markdown-content.css";
+// No CSS import here. Apps import "@emergency-map/web-ui/styles.css" from their own stylesheet;
+// importing it from JS shipped a second Tailwind build whose `.hidden` loaded after the app's
+// `md:flex` and hid the desktop navigation.

@@ -10,6 +10,7 @@ import { EventsMap } from "./events-map";
 import { HelpTeaser } from "./help-teaser";
 import { Indicators } from "./indicators";
 import { LocalityBlock } from "./locality-block";
+import { WhatsappHero } from "./whatsapp-hero";
 import {
   DASHBOARD_PERIOD_LABEL,
   selectDashboardView,
@@ -92,11 +93,12 @@ export function Dashboard() {
 
   return (
     <div className="mx-auto w-full max-w-[1160px] space-y-8 px-4 py-6 md:px-10 md:py-10">
+      <WhatsappHero />
       <header className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
         <div className="grid gap-2.5">
-          <h1 className="font-heading text-[28px] leading-[1.1] font-semibold tracking-tight md:text-[34px]">
+          <h2 className="font-heading text-[26px] leading-[1.1] font-bold text-cacao md:text-[30px]">
             Qué se ha reportado en {scopeName}
-          </h1>
+          </h2>
           <p className="text-[var(--text-secondary)]">
             Eventos publicados en los {DASHBOARD_PERIOD_LABEL}, según reportes ciudadanos y fuentes
             conectadas. La cobertura es parcial.
