@@ -85,6 +85,10 @@ Key topics (don't re-document them here):
   type-check, tests. The Lefthook pre-push runs it, and both release workflows run it in a `verify`
   job that `deploy` needs. No workflow runs on pull requests (`docs/adr/0001-release-pipeline.md`).
   Change the checks in `verify`, never in one caller.
+- **Files written by release-please are never format-checked (sharp gotcha):** the bot commits
+  `CHANGELOG.md` and `.release-please-manifest.json` without running Lefthook, in its own style,
+  and the release's `verify` job checks formatting on that commit. Both are in `.oxfmtrc.json`
+  `ignorePatterns`; keep them there, and add any other file the bot starts writing.
 - **Schema changes ship as migrations:** `pnpm run db:push` is for local iteration only. Commit a
   migration with `pnpm run db:generate` (files under `packages/infra-db/src/migrations/`); the API
   release applies them with `db:migrate` before deploying the Worker.
