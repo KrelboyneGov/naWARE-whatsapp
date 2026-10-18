@@ -1,8 +1,9 @@
-# emergency-map
+# KlAimate
 
-Emergency and aid map for Peru. A web platform to understand what is happening in a given area,
-read official warnings, and find organizations or communities to receive help from or collaborate
-with. Product context: [`docs/product-brief.md`](./docs/product-brief.md).
+KlAimate is the visible name of this app: a district rain and natural-event view for Peru, plus
+WhatsApp alerts. The package scope stays `@emergency-map`. The map still shows official warnings,
+reported emergencies and available help. Product context: [`docs/product-brief.md`](./docs/product-brief.md).
+WhatsApp flow, webhook and env vars: [`docs/whatsapp.md`](./docs/whatsapp.md).
 
 Monorepo scaffolded from [monorepo-template](https://github.com/niway-dev/monorepo-template)
 (Client-Server Hono pattern): TypeScript, pnpm, Turborepo, DDD + Hexagonal Architecture.
@@ -35,6 +36,21 @@ pnpm run dev       # API on :3000, web on :3001
 
 Copy each app's `.env.example` to `.env` if it does not exist yet.
 
+## WhatsApp
+
+Inbound messages hit `POST /api/v1/webhooks/zavu`. In the Zavu dashboard open **Senders → Achalau HCO**
+(the WhatsApp sender; the default sender is SMS-only) → **Webhooks** → event `message.inbound`, and
+set the URL to `https://<api-host>/api/v1/webhooks/zavu`. Put that sender's signing secret in
+`ZAVU_WEBHOOK_SECRET`.
+
+Every send sets `Zavu-Sender` from `ZAVU_SENDER_ID` (`kd7b3sknk6z3xvn5pykzgkc7a58ghwe7`) and
+`channel=whatsapp`. `ZAVU_CAN_SEND_TEMPLATES` stays false until the sender's payment setup allows
+templates; those jobs are recorded once and not retried. Copy `apps/server-hono/.env.example`.
+Do not commit API keys or the business phone number.
+
+`pnpm run whatsapp:templates` prints the utility catalog and does not call Zavu. Add `-- --submit`
+only when the key and sender id are set.
+
 ## Apps and packages
 
 ```
@@ -48,6 +64,7 @@ packages/
 ├── infra-auth/        # Better Auth base config
 ├── infra-cloudflare/  # Service Binding fetch + proxy handler
 ├── infra-env/         # Zod env schemas per app
+├── infra-messaging/   # Zavu WhatsApp adapter, OpenAI-compatible LLM, Open-Meteo
 ├── web-ui/            # Shared React UI (built to dist/)
 └── config/            # Shared tsconfig
 ```

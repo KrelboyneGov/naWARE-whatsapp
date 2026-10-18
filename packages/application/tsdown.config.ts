@@ -4,6 +4,7 @@ export default defineConfig({
   entry: {
     index: "src/index.ts",
     todos: "src/todos/index.ts",
+    messaging: "src/messaging/index.ts",
     events: "src/events/index.ts",
     evidence: "src/evidence/index.ts",
     review: "src/review/index.ts",

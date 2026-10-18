@@ -25,6 +25,7 @@ export {
   NeedRepository,
   OrganizationRepository,
 } from "./help.repository";
+export { MessagingRepository } from "./messaging.repository";
 
 /** Wires every domain repository interface to its Drizzle implementation. */
 export function createRepositories(db: DatabaseClient): Repositories {

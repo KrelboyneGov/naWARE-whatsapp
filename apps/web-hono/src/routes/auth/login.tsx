@@ -8,7 +8,7 @@ import { safeRedirect } from "@/lib/safe-redirect";
 export const Route = createFileRoute("/auth/login")({
   validateSearch: z.object({ redirect: z.string().optional() }),
   component: Page,
-  head: () => ({ meta: [{ title: "Ingresar · Andes Alerta" }] }),
+  head: () => ({ meta: [{ title: "Ingresar · KlAimate" }] }),
   beforeLoad: async (ctx) => {
     if (ctx.context.isAuthenticated) {
       throw redirectTo({ to: safeRedirect(ctx.search.redirect) });

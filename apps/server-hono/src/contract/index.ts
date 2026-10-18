@@ -6,6 +6,7 @@ import { reviewContract } from "./review.contract";
 import { territoryContract } from "./territory.contract";
 import { helpContract } from "./help.contract";
 import { sourcesContract } from "./sources.contract";
+import { onboardingContract } from "./onboarding.contract";
 
 export const contract = oc.router({
   todo: todoContract,
@@ -15,6 +16,7 @@ export const contract = oc.router({
   territory: territoryContract,
   help: helpContract,
   sources: sourcesContract,
+  onboarding: onboardingContract,
 });
 
 export {
@@ -25,6 +27,7 @@ export {
   territoryContract,
   helpContract,
   sourcesContract,
+  onboardingContract,
 };
 
 export type Contract = typeof contract;
