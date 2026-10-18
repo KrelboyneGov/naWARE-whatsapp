@@ -17,6 +17,15 @@ from [monorepo-template](https://github.com/niway-dev/monorepo-template) (Client
 - `packages/domain` → `application` → `infra-db`, `infra-auth`, `infra-cloudflare`, `infra-env`;
   `web-ui` (shadcn/ui), `config` (tsconfig). See `.claude/architecture.md`.
 
+## Team knowledge base and decision matrix
+
+Linear (workspace naWARE) is the source of truth for team decisions; `KNOWLEDGE.base/` is its
+verified local copy (in Spanish, mirroring Linear). Read and apply `AGENTS.md` and the
+`naware-knowledge` skill (`/naware-knowledge`, canonical copy in `.agents/skills/`) every session:
+changing the decision matrix requires an alert with a before/after and explicit human approval,
+and every session ends with a "Revisión final naWARE". The hooks in `.claude/settings.json`
+(Node.js) ask for confirmation before writes to `KNOWLEDGE.base/` or Linear and require that review.
+
 ## Knowledge lives in the hub, not here
 
 Reusable, product-agnostic knowledge is **not** duplicated in this file — it lives in the

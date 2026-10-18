@@ -1,0 +1,6 @@
+interface:
+  display_name: "naWARE Knowledge"
+  short_description: "Consulta Linear y revisa cambios con autorización humana"
+  default_prompt: "Usa $naware-knowledge para consultar la base de naWARE y cerrar esta sesión con la revisión de la matriz."
+policy:
+  allow_implicit_invocation: true

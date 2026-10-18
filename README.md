@@ -79,3 +79,7 @@ Decision records: [`docs/adr/`](./docs/adr/).
 - `docs/deployment.md` — environments, secrets, release procedure
 - `docs/adr/` — architecture decision records
 - `CLAUDE.md` — working rules for AI agents and contributors
+- `KNOWLEDGE.base/` — team decision matrix and context, a verified copy of Linear (the source of
+  truth). AI assistants load the `naware-knowledge` skill (`AGENTS.md`): matrix changes need a
+  before/after alert and human approval, and each session ends with a final review. Connect your
+  assistant to the naWARE Linear workspace with your own account; never commit tokens.
