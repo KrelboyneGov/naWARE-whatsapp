@@ -25,6 +25,9 @@ review, publication, situation) that are never merged into one "verified" badge.
 | 9   | Auth stays email + password; "Andes Alerta" is a display constant, scope stays `@emergency-map` | Already working; renaming is a separate decision                                     | —          |
 | 10  | The design package supersedes `docs/product-brief.md`; its data invariants are kept             | More recent and more detailed; invariants are compatible                             | —          |
 
+Contracts for the layered map (Community, SemaforoCell, Ingestor<T>) are in
+[2026-10-18-domain-contracts.md](./2026-10-18-domain-contracts.md) and ADR 0008.
+
 ## Open questions
 
 - District polygons: a public source with a clear license was not yet identified. Until then

@@ -352,3 +352,176 @@ export const DEMO_NEEDS: Need[] = [
     updatedAt: hoursAgo(24 * 3),
   },
 ];
+
+// ---------------------------------------------------------------------------
+// Layered map contracts (ADR 0008): communities, per-layer district cells, ingest runs.
+// ---------------------------------------------------------------------------
+
+import type { Community } from "../schemas/community";
+import type { DistrictLayers, SemaforoCell } from "../schemas/layer";
+import type { IngestBatch } from "../schemas/ingest";
+import type { ImportRun } from "../schemas/source";
+
+export const DEMO_COMMUNITIES: Community[] = [
+  {
+    id: "COM-DEMO-01",
+    name: "Brigada vecinal de ejemplo (Chosica)",
+    description: "Grupo ficticio de vecinos que coordina limpieza de quebradas. Demostración.",
+    kind: "neighbourhood_group",
+    coverage: [DEMO_PLACES.lurigancho],
+    joinUrl: "https://grupo.ejemplo.invalid/brigada-chosica",
+    contacts: [{ kind: "email", value: "brigada@ejemplo.invalid", isDemo: true }],
+    organizationId: null,
+    linkReview: "reviewed",
+    linkReviewedAt: hoursAgo(24),
+    isDemo: true,
+    createdAt: hoursAgo(24 * 20),
+    updatedAt: hoursAgo(24),
+  },
+  {
+    id: "COM-DEMO-02",
+    name: "Voluntariado de ejemplo A",
+    description: "Voluntariado ficticio vinculado a la Organización de ejemplo A. Demostración.",
+    kind: "volunteer_group",
+    coverage: [DEMO_PLACES.lurigancho, DEMO_PLACES.huancayo],
+    joinUrl: null,
+    contacts: [{ kind: "email", value: "voluntariado@ejemplo.invalid", isDemo: true }],
+    organizationId: "ORG-DEMO-01",
+    linkReview: "pending",
+    linkReviewedAt: null,
+    isDemo: true,
+    createdAt: hoursAgo(24 * 10),
+    updatedAt: hoursAgo(24 * 10),
+  },
+];
+
+const cell = (
+  c: Partial<SemaforoCell> & Pick<SemaforoCell, "territory" | "layer" | "sourceId" | "status">,
+): SemaforoCell => ({
+  level: null,
+  legend: null,
+  colorToken: null,
+  recordIds: [],
+  sourcePublishedAt: null,
+  fetchedAt: hoursAgo(1),
+  validFrom: null,
+  validTo: null,
+  isDemo: true,
+  ...c,
+});
+
+/**
+ * Two districts, several layers each. Huancayo shows why layers are not merged: an active
+ * orange rain notice and a district with no citizen reports are two independent facts.
+ */
+export const DEMO_DISTRICT_LAYERS: DistrictLayers[] = [
+  {
+    territory: DEMO_PLACES.huancayo,
+    cells: [
+      cell({
+        territory: DEMO_PLACES.huancayo,
+        layer: "official_notices",
+        sourceId: "SRC-DEMO-SENAMHI",
+        status: "has_data",
+        level: "orange",
+        legend: "Nivel naranja (simulado)",
+        colorToken: "severity-orange",
+        recordIds: ["DEMO-04"],
+        sourcePublishedAt: hoursAgo(10),
+        validFrom: hoursAgo(6),
+        validTo: new Date(DEMO_NOW.getTime() + 30 * 3_600_000),
+      }),
+      cell({
+        territory: DEMO_PLACES.huancayo,
+        layer: "citizen_reports",
+        sourceId: "SRC-CITIZEN",
+        status: "no_information",
+      }),
+      cell({
+        territory: DEMO_PLACES.huancayo,
+        layer: "official_emergencies",
+        sourceId: "SRC-DEMO-INDECI",
+        status: "source_unavailable",
+        fetchedAt: hoursAgo(26),
+      }),
+    ],
+  },
+  {
+    territory: DEMO_PLACES.lurigancho,
+    cells: [
+      cell({
+        territory: DEMO_PLACES.lurigancho,
+        layer: "citizen_reports",
+        sourceId: "SRC-CITIZEN",
+        status: "has_data",
+        level: "unverified",
+        legend: "Sin corroborar",
+        colorToken: "review-unverified",
+        recordIds: ["DEMO-01"],
+        sourcePublishedAt: hoursAgo(2),
+      }),
+      cell({
+        territory: DEMO_PLACES.lurigancho,
+        layer: "official_notices",
+        sourceId: "SRC-DEMO-SENAMHI",
+        status: "no_information",
+      }),
+      cell({
+        territory: DEMO_PLACES.lurigancho,
+        layer: "help_points",
+        sourceId: "SRC-DIRECTORY",
+        status: "has_data",
+        recordIds: ["ACOPIO-DEMO-01"],
+      }),
+      cell({
+        territory: DEMO_PLACES.lurigancho,
+        layer: "communities",
+        sourceId: "SRC-DIRECTORY",
+        status: "has_data",
+        recordIds: ["COM-DEMO-01", "COM-DEMO-02"],
+      }),
+    ],
+  },
+];
+
+/** What a notice ingestor returns for one fetch: one normalized item and one rejected row. */
+export const DEMO_INGEST_BATCH: IngestBatch<Omit<OfficialNotice, "id" | "fetchedAt" | "validity">> =
+  {
+    sourceId: "SRC-DEMO-SENAMHI",
+    layer: "official_notices",
+    items: [
+      {
+        externalId: "DEMO-AVISO-LLUVIAS",
+        payload: (({ id: _id, fetchedAt: _f, validity: _v, ...rest }) => rest)(DEMO_NOTICES[0]!),
+        sourceUrl: null,
+        sourcePublishedAt: hoursAgo(10),
+      },
+    ],
+    rejected: [{ externalId: "DEMO-AVISO-SIN-AREA", reason: "Notice has no area or district" }],
+    rawRef: null,
+    fetchedAt: hoursAgo(1),
+  };
+
+/** IngestRun history: one success and one failure that kept the previous data. */
+export const DEMO_INGEST_RUNS: ImportRun[] = [
+  {
+    id: "RUN-DEMO-01",
+    sourceId: "SRC-DEMO-SENAMHI",
+    startedAt: hoursAgo(1),
+    finishedAt: hoursAgo(1),
+    status: "partial",
+    processed: 1,
+    duplicatesAvoided: 1,
+    errorSummary: "1 record rejected: no area or district",
+  },
+  {
+    id: "RUN-DEMO-02",
+    sourceId: "SRC-DEMO-INDECI",
+    startedAt: hoursAgo(26),
+    finishedAt: hoursAgo(26),
+    status: "failed",
+    processed: 0,
+    duplicatesAvoided: 0,
+    errorSummary: "Source timed out; previous records kept",
+  },
+];
