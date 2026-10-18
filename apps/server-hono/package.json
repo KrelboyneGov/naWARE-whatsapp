@@ -10,7 +10,8 @@
     "deploy": "wrangler deploy",
     "cf:gen-types": "wrangler types --env-interface CloudflareBindings",
     "test:integration": "dotenvx run -f .env.test -- vitest run --config vitest.integration.config.ts",
-    "test:integration:ci": "vitest run --config vitest.integration.config.ts"
+    "test:integration:ci": "vitest run --config vitest.integration.config.ts",
+    "demo:notify": "tsx scripts/demo-notify.ts"
   },
   "dependencies": {
     "@emergency-map/application": "workspace:*",
@@ -30,6 +31,7 @@
   "devDependencies": {
     "@emergency-map/config": "workspace:*",
     "tsdown": "catalog:",
+    "tsx": "^4.23.15",
     "typescript": "catalog:",
     "vitest": "catalog:",
     "wrangler": "catalog:"
