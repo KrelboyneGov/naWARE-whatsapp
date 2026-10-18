@@ -1,0 +1,59 @@
+name: Release Please
+
+# Tier: release cutter (ADR 0007; hub: monorepos/release-please-playbook.md). On every push to
+# main it maintains one rolling release PR with the changelog and the next version. Merging that
+# PR creates the tag vX.Y.Z and a GitHub Release; this workflow then calls the two deploy
+# workflows in order (API first, the web Worker's Service Binding needs it), each gated by its
+# own `verify` job on the tagged ref.
+#
+# Deploys are called directly instead of being triggered by the tag push: a tag created with
+# GITHUB_TOKEN does not trigger other workflows, and this avoids a personal access token.
+#
+# Reopen: if the web and API ever stop sharing workspace packages, split into two version lines.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: release-please
+  # Never cancel a half-finished release cut; queue instead.
+  cancel-in-progress: false
+
+jobs:
+  release-please:
+    name: Release Please
+    runs-on: ubuntu-latest
+    outputs:
+      release_created: ${{ steps.release.outputs.release_created }}
+      tag_name: ${{ steps.release.outputs.tag_name }}
+    steps:
+      - id: release
+        uses: googleapis/release-please-action@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          config-file: release-please-config.json
+          manifest-file: .release-please-manifest.json
+
+  deploy-api:
+    name: Deploy API
+    needs: release-please
+    if: needs.release-please.outputs.release_created == 'true'
+    uses: ./.github/workflows/release-api.yml
+    with:
+      ref: ${{ needs.release-please.outputs.tag_name }}
+    secrets: inherit
+
+  deploy-web:
+    name: Deploy Web
+    needs: [release-please, deploy-api]
+    if: needs.release-please.outputs.release_created == 'true'
+    uses: ./.github/workflows/release-web.yml
+    with:
+      ref: ${{ needs.release-please.outputs.tag_name }}
+    secrets: inherit

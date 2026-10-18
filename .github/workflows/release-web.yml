@@ -2,7 +2,8 @@ name: Release Web
 
 # Tier: release (docs/adr/0001-release-pipeline.md; hub: monorepos/release-gated-verification.md R1,
 # monorepos/worker-secrets-with-deploy.md). Ships apps/web-hono (TanStack Start) to the `web-hono`
-# Worker when a `web-v*.*.*` tag is pushed, or on manual dispatch from the Actions tab.
+# Worker when release-please cuts a release (single version line, tag `vX.Y.Z`, ADR 0007), or on
+# manual dispatch with an existing tag.
 #
 # `verify` runs the root `pnpm run verify` on the tagged SHA and `deploy` needs it. The web Worker is
 # a pure proxy client: it reaches the API through the `API_SERVICE` Service Binding declared in
@@ -13,13 +14,23 @@ name: Release Web
 # prefix or a dispatch input, never on a long-lived branch.
 
 on:
-  push:
-    tags:
-      - "web-v*.*.*"
+  # Called by release-please.yml when a release is cut (tag vX.Y.Z), with that tag as `ref`.
+  workflow_call:
+    inputs:
+      ref:
+        description: Git ref (release tag) to build and deploy
+        type: string
+        required: true
+  # Manual re-run or rollback: pass an existing tag, e.g. v0.1.0.
   workflow_dispatch:
+    inputs:
+      ref:
+        description: Git ref (release tag) to build and deploy
+        type: string
+        required: true
 
 concurrency:
-  group: release-web
+  group: release-web-${{ inputs.ref }}
   cancel-in-progress: false
 
 env:
@@ -33,6 +44,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref }}
 
       # Node and pnpm versions come from mise.toml, the same file developers use locally.
       - name: Setup Node and pnpm (mise)
@@ -66,6 +79,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref }}
 
       # Node and pnpm versions come from mise.toml, the same file developers use locally.
       - name: Setup Node and pnpm (mise)

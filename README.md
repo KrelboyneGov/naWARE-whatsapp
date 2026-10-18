@@ -63,11 +63,11 @@ Dependency rule: `domain <- application <- infra-*`; only apps wire them togethe
 
 ## Deployment
 
-Tag-driven releases to Cloudflare Workers, each gated by `verify`:
+Releases are cut by release-please and deploy both Workers, each gated by `verify`:
 
 ```bash
-git tag api-v0.1.0 && git push origin api-v0.1.0   # .github/workflows/release-api.yml
-git tag web-v0.1.0 && git push origin web-v0.1.0   # .github/workflows/release-web.yml
+# Merge to main with Conventional Commits; release-please keeps a release PR open.
+# Merging that PR tags vX.Y.Z and deploys the API, then the web (release-please.yml).
 ```
 
 Required secrets, variables and first-deploy order: [`docs/deployment.md`](./docs/deployment.md).

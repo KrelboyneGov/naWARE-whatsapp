@@ -1,14 +1,19 @@
 # Deployment
 
-Both apps run on Cloudflare Workers and ship through tag-driven GitHub Actions workflows gated by
-`verify`. Why it is built this way: [ADR 0001](./adr/0001-release-pipeline.md).
+Both apps run on Cloudflare Workers and ship together on one version line cut by release-please; each deploy is gated by
+`verify`. Why: [ADR 0001](./adr/0001-release-pipeline.md) and [ADR 0007](./adr/0007-release-please-single-version-line.md).
 
-| Deployable | App                | Worker name       | Tag          | Workflow                            |
-| ---------- | ------------------ | ----------------- | ------------ | ----------------------------------- |
-| API        | `apps/server-hono` | `server-hono-api` | `api-v*.*.*` | `.github/workflows/release-api.yml` |
-| Web        | `apps/web-hono`    | `web-hono`        | `web-v*.*.*` | `.github/workflows/release-web.yml` |
+| Deployable | App                | Worker name       | Tag      | Workflow                            |
+| ---------- | ------------------ | ----------------- | -------- | ----------------------------------- |
+| API        | `apps/server-hono` | `server-hono-api` | `v*.*.*` | `.github/workflows/release-api.yml` |
+| Web        | `apps/web-hono`    | `web-hono`        | `v*.*.*` | `.github/workflows/release-web.yml` |
 
-Each workflow also has a `workflow_dispatch` trigger for manual runs from the Actions tab.
+Both deploy workflows are called by `.github/workflows/release-please.yml` and also accept a
+manual `workflow_dispatch` with a tag as `ref`.
+
+One-time repository setting: Settings → Actions → General → Workflow permissions → enable
+"Allow GitHub Actions to create and approve pull requests" (release-please opens its PR with
+`GITHUB_TOKEN`).
 
 ## One-time setup
 
@@ -30,7 +35,7 @@ Each workflow also has a `workflow_dispatch` trigger for manual runs from the Ac
    | `API_URL`               | variable | optional; enables the API smoke check               |
    | `WEB_URL`               | variable | optional; enables the web smoke check               |
 
-   Restrict the environment to tags matching `api-v*` and `web-v*` once branch/tag rules are in
+   Restrict the environment to tags matching `v*` once branch/tag rules are in
    place.
 
 4. **Actions budget:** set a non-zero spending limit and the usage alerts before the first run
@@ -42,13 +47,15 @@ Deploy the **API first**, then the **web**: the web Worker reaches the API throu
 `API_SERVICE` Service Binding declared in `apps/web-hono/wrangler.jsonc`, so `server-hono-api`
 must already exist.
 
-```bash
-git tag api-v0.1.0 && git push origin api-v0.1.0
-# wait for "Release API" to go green, then
-git tag web-v0.1.0 && git push origin web-v0.1.0
+```text
+1. Merge work into main with Conventional Commits (feat:, fix:, ...).
+2. release-please opens or updates the PR "chore(main): release X.Y.Z".
+3. Merge that PR: it tags vX.Y.Z, creates the GitHub Release, then release-please.yml
+   calls release-api.yml and, after it succeeds, release-web.yml with that tag.
 ```
 
-After that, the two ship independently in any order.
+Rollback or re-run: dispatch `release-api.yml` / `release-web.yml` from the Actions tab with an
+existing tag as `ref`. Why one version line for both Workers: [ADR 0007](./adr/0007-release-please-single-version-line.md).
 
 ## What a release does
 
