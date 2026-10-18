@@ -39,7 +39,7 @@ export default function Header({
             to="/"
             className="text-[17px] font-semibold tracking-[-0.02em] text-text-primary hover:text-text-primary hover:no-underline"
           >
-            Andes Alerta<span className="text-accent-primary">.</span>
+            KlAimate<span className="text-accent-primary">.</span>
           </Link>
           <Badge
             variant="secondary"

@@ -18,6 +18,7 @@
     "@emergency-map/infra-auth": "workspace:*",
     "@emergency-map/infra-db": "workspace:*",
     "@emergency-map/infra-env": "workspace:*",
+    "@emergency-map/infra-messaging": "workspace:*",
     "@orpc/contract": "catalog:",
     "@orpc/openapi": "catalog:",
     "@orpc/server": "catalog:",

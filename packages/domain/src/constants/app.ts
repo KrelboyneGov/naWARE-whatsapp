@@ -1,5 +1,5 @@
 /** Display name. The technical scope stays @emergency-map (spec decision 9). */
-export const APP_DISPLAY_NAME = "Andes Alerta";
+export const APP_DISPLAY_NAME = "KlAimate";
 
 /** All times are stored in UTC and rendered in this zone. */
 export const APP_TIME_ZONE = "America/Lima";

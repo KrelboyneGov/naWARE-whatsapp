@@ -11,3 +11,6 @@ export * from "./layer";
 export * from "./community";
 export * from "./ingest";
 export * from "./signal";
+export * from "./messaging";
+export * from "../whatsapp/catalog";
+export * from "../whatsapp/copy";

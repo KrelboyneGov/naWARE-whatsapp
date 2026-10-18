@@ -6,3 +6,4 @@ export * from "./evidence";
 export * from "./review";
 export * from "./source";
 export * from "./help";
+export * from "./messaging";

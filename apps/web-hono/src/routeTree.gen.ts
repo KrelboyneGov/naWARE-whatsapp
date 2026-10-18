@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as UrgenciasRouteImport } from './routes/urgencias'
 import { Route as ReportarRouteImport } from './routes/reportar'
+import { Route as PrivacidadRouteImport } from './routes/privacidad'
 import { Route as OrganizacionRouteImport } from './routes/organizacion'
 import { Route as MiLocalidadRouteImport } from './routes/mi-localidad'
 import { Route as MapaRouteImport } from './routes/mapa'
@@ -39,6 +40,11 @@ const UrgenciasRoute = UrgenciasRouteImport.update({
 const ReportarRoute = ReportarRouteImport.update({
   id: '/reportar',
   path: '/reportar',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PrivacidadRoute = PrivacidadRouteImport.update({
+  id: '/privacidad',
+  path: '/privacidad',
   getParentRoute: () => rootRouteImport,
 } as any)
 const OrganizacionRoute = OrganizacionRouteImport.update({
@@ -147,6 +153,7 @@ export interface FileRoutesByFullPath {
   '/mapa': typeof MapaRoute
   '/mi-localidad': typeof MiLocalidadRoute
   '/organizacion': typeof OrganizacionRoute
+  '/privacidad': typeof PrivacidadRoute
   '/reportar': typeof ReportarRoute
   '/urgencias': typeof UrgenciasRoute
   '/auth/login': typeof AuthLoginRoute
@@ -169,6 +176,7 @@ export interface FileRoutesByTo {
   '/mapa': typeof MapaRoute
   '/mi-localidad': typeof MiLocalidadRoute
   '/organizacion': typeof OrganizacionRoute
+  '/privacidad': typeof PrivacidadRoute
   '/reportar': typeof ReportarRoute
   '/urgencias': typeof UrgenciasRoute
   '/auth/login': typeof AuthLoginRoute
@@ -193,6 +201,7 @@ export interface FileRoutesById {
   '/mapa': typeof MapaRoute
   '/mi-localidad': typeof MiLocalidadRoute
   '/organizacion': typeof OrganizacionRoute
+  '/privacidad': typeof PrivacidadRoute
   '/reportar': typeof ReportarRoute
   '/urgencias': typeof UrgenciasRoute
   '/auth/login': typeof AuthLoginRoute
@@ -217,6 +226,7 @@ export interface FileRouteTypes {
     | '/mapa'
     | '/mi-localidad'
     | '/organizacion'
+    | '/privacidad'
     | '/reportar'
     | '/urgencias'
     | '/auth/login'
@@ -239,6 +249,7 @@ export interface FileRouteTypes {
     | '/mapa'
     | '/mi-localidad'
     | '/organizacion'
+    | '/privacidad'
     | '/reportar'
     | '/urgencias'
     | '/auth/login'
@@ -262,6 +273,7 @@ export interface FileRouteTypes {
     | '/mapa'
     | '/mi-localidad'
     | '/organizacion'
+    | '/privacidad'
     | '/reportar'
     | '/urgencias'
     | '/auth/login'
@@ -286,6 +298,7 @@ export interface RootRouteChildren {
   MapaRoute: typeof MapaRoute
   MiLocalidadRoute: typeof MiLocalidadRoute
   OrganizacionRoute: typeof OrganizacionRoute
+  PrivacidadRoute: typeof PrivacidadRoute
   ReportarRoute: typeof ReportarRoute
   UrgenciasRoute: typeof UrgenciasRoute
   AuthLoginRoute: typeof AuthLoginRoute
@@ -310,6 +323,13 @@ declare module '@tanstack/react-router' {
       path: '/reportar'
       fullPath: '/reportar'
       preLoaderRoute: typeof ReportarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/privacidad': {
+      id: '/privacidad'
+      path: '/privacidad'
+      fullPath: '/privacidad'
+      preLoaderRoute: typeof PrivacidadRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/organizacion': {
@@ -476,6 +496,7 @@ const rootRouteChildren: RootRouteChildren = {
   MapaRoute: MapaRoute,
   MiLocalidadRoute: MiLocalidadRoute,
   OrganizacionRoute: OrganizacionRoute,
+  PrivacidadRoute: PrivacidadRoute,
   ReportarRoute: ReportarRoute,
   UrgenciasRoute: UrgenciasRoute,
   AuthLoginRoute: AuthLoginRoute,

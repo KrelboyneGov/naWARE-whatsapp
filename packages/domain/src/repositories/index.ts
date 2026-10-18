@@ -17,6 +17,22 @@ export type {
   ICollectionPointRepository,
 } from "./help.repository";
 export type { IDataSourceRepository } from "./source.repository";
+export type {
+  IMessagingStore,
+  INotificationPort,
+  ILlmPort,
+  IForecastPort,
+  ILog,
+  NotificationSendResult,
+  SendTextInput,
+  SendTemplateInput,
+  LlmMessage,
+  LlmToolDefinition,
+  LlmToolCall,
+  LlmCompletion,
+  ForecastQuery,
+  ForecastSnapshot,
+} from "./messaging";
 
 import type { ITodoRepository } from "./todo.repository";
 import type { IEventRepository } from "./event.repository";
