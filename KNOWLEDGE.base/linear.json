@@ -14,8 +14,8 @@
   "skill_document_id": null,
   "skill_document_url": null,
   "publication_status": "published_verified",
-  "last_verified_at": "2026-10-17T23:21:51Z",
-  "remote_updated_at": "2026-10-17T23:21:51.309Z",
-  "local_seed_version": "0.2",
-  "note": "Documentos 0 y 7 creados y verificados por lectura el 2026-10-17 con autorización explícita del usuario. La skill se distribuye en el repositorio; el documento 0 explica cómo cargarla. Los documentos 1 a 6 del proyecto no se modificaron."
+  "last_verified_at": "2026-10-18T00:46:41Z",
+  "remote_updated_at": "2026-10-18T00:46:41.458Z",
+  "local_seed_version": "0.3",
+  "note": "v0.3 (2026-10-18): D-09 actualizado en el documento 7 y verificado por lectura, con autorización explícita del usuario. Documentos 0 y 7 creados y verificados por lectura el 2026-10-17 con autorización explícita del usuario. La skill se distribuye en el repositorio; el documento 0 explica cómo cargarla. Los documentos 1 a 6 del proyecto no se modificaron."
 }
