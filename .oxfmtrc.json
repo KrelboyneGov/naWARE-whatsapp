@@ -7,6 +7,8 @@
     "**/worker-configuration.d.ts",
     "**/out/**",
     "**/.wrangler/**",
-    "packages/infra-db/src/migrations/**"
+    "packages/infra-db/src/migrations/**",
+    "CHANGELOG.md",
+    ".release-please-manifest.json"
   ]
 }
