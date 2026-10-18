@@ -5,6 +5,7 @@ import {
   List,
   Map,
   PlusCircle,
+  Siren,
   type LucideIcon,
 } from "lucide-react";
 
@@ -19,6 +20,7 @@ export interface NavItem {
 /** Desktop primary navigation (design doc 02). "Reportar" is the CTA, rendered apart. */
 export const DESKTOP_NAV: NavItem[] = [
   { to: "/", label: "Inicio", icon: House },
+  { to: "/urgencias", label: "Urgencias", icon: Siren },
   { to: "/mapa", label: "Mapa", icon: Map },
   { to: "/eventos", label: "Eventos", icon: List },
   { to: "/ayudar", label: "Ayudar", icon: HandHeart },
@@ -31,7 +33,7 @@ export const MOBILE_NAV: NavItem[] = [
   { to: "/", label: "Inicio", icon: House },
   { to: "/mapa", label: "Mapa", icon: Map },
   REPORT_ITEM,
-  { to: "/ayudar", label: "Ayudar", icon: HandHeart },
+  { to: "/urgencias", label: "Urgencias", icon: Siren },
 ];
 
 export const ACCOUNT_ITEM_SIGNED_OUT: NavItem = {
@@ -51,6 +53,7 @@ export const ACCOUNT_ITEM_SIGNED_IN: NavItem = {
  * internal pages only for reviewer/admin roles.
  */
 export const ACCOUNT_LINKS: Array<{ to: string; label: string }> = [
+  { to: "/ayudar", label: "Ayudar" },
   { to: "/mi-localidad", label: "Mi localidad" },
   { to: "/cerca", label: "Cerca de mí" },
   { to: "/fuentes", label: "Fuentes" },

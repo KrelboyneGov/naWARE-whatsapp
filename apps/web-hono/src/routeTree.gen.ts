@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as UrgenciasRouteImport } from './routes/urgencias'
 import { Route as ReportarRouteImport } from './routes/reportar'
 import { Route as OrganizacionRouteImport } from './routes/organizacion'
 import { Route as MiLocalidadRouteImport } from './routes/mi-localidad'
@@ -30,6 +31,11 @@ import { Route as ApiV1SplatRouteImport } from './routes/api/v1/$'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as AuthenticatedRevisionIdRouteImport } from './routes/_authenticated/revision/$id'
 
+const UrgenciasRoute = UrgenciasRouteImport.update({
+  id: '/urgencias',
+  path: '/urgencias',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ReportarRoute = ReportarRouteImport.update({
   id: '/reportar',
   path: '/reportar',
@@ -142,6 +148,7 @@ export interface FileRoutesByFullPath {
   '/mi-localidad': typeof MiLocalidadRoute
   '/organizacion': typeof OrganizacionRoute
   '/reportar': typeof ReportarRoute
+  '/urgencias': typeof UrgenciasRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/signup': typeof AuthSignupRoute
   '/eventos/$id': typeof EventosIdRoute
@@ -163,6 +170,7 @@ export interface FileRoutesByTo {
   '/mi-localidad': typeof MiLocalidadRoute
   '/organizacion': typeof OrganizacionRoute
   '/reportar': typeof ReportarRoute
+  '/urgencias': typeof UrgenciasRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/signup': typeof AuthSignupRoute
   '/eventos/$id': typeof EventosIdRoute
@@ -186,6 +194,7 @@ export interface FileRoutesById {
   '/mi-localidad': typeof MiLocalidadRoute
   '/organizacion': typeof OrganizacionRoute
   '/reportar': typeof ReportarRoute
+  '/urgencias': typeof UrgenciasRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/signup': typeof AuthSignupRoute
   '/eventos/$id': typeof EventosIdRoute
@@ -209,6 +218,7 @@ export interface FileRouteTypes {
     | '/mi-localidad'
     | '/organizacion'
     | '/reportar'
+    | '/urgencias'
     | '/auth/login'
     | '/auth/signup'
     | '/eventos/$id'
@@ -230,6 +240,7 @@ export interface FileRouteTypes {
     | '/mi-localidad'
     | '/organizacion'
     | '/reportar'
+    | '/urgencias'
     | '/auth/login'
     | '/auth/signup'
     | '/eventos/$id'
@@ -252,6 +263,7 @@ export interface FileRouteTypes {
     | '/mi-localidad'
     | '/organizacion'
     | '/reportar'
+    | '/urgencias'
     | '/auth/login'
     | '/auth/signup'
     | '/eventos/$id'
@@ -275,6 +287,7 @@ export interface RootRouteChildren {
   MiLocalidadRoute: typeof MiLocalidadRoute
   OrganizacionRoute: typeof OrganizacionRoute
   ReportarRoute: typeof ReportarRoute
+  UrgenciasRoute: typeof UrgenciasRoute
   AuthLoginRoute: typeof AuthLoginRoute
   AuthSignupRoute: typeof AuthSignupRoute
   EventosIdRoute: typeof EventosIdRoute
@@ -285,6 +298,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/urgencias': {
+      id: '/urgencias'
+      path: '/urgencias'
+      fullPath: '/urgencias'
+      preLoaderRoute: typeof UrgenciasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/reportar': {
       id: '/reportar'
       path: '/reportar'
@@ -457,6 +477,7 @@ const rootRouteChildren: RootRouteChildren = {
   MiLocalidadRoute: MiLocalidadRoute,
   OrganizacionRoute: OrganizacionRoute,
   ReportarRoute: ReportarRoute,
+  UrgenciasRoute: UrgenciasRoute,
   AuthLoginRoute: AuthLoginRoute,
   AuthSignupRoute: AuthSignupRoute,
   EventosIdRoute: EventosIdRoute,

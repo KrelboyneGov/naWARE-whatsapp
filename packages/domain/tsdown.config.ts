@@ -12,6 +12,7 @@ export default defineConfig({
     // `devExports`, so a subpath only survives if it is an entry here.
     testing: "src/testing/index.ts",
     demo: "src/demo/index.ts",
+    rules: "src/rules/index.ts",
   },
 
   exports: {

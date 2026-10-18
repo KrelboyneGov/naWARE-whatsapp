@@ -8,6 +8,7 @@ import type { TerritoryRef } from "../schemas/common";
 import type { Territory } from "../schemas/territory";
 import type { CollectionPoint, Need, Organization } from "../schemas/help";
 import type { DataSource, OfficialNotice } from "../schemas/source";
+import type { EventSignal, QuickReport } from "../schemas/signal";
 
 export const DEMO_NOW = new Date("2026-10-17T15:00:00.000Z"); // 10:00 in Lima
 
@@ -30,6 +31,9 @@ export const DEMO_PLACES = {
   huaraz: t("020101", "Huaraz", "Huaraz", "Áncash"),
   arequipa: t("040101", "Arequipa", "Arequipa", "Arequipa"),
   puno: t("210101", "Puno", "Puno", "Puno"),
+  chorrillos: t("150108", "Chorrillos", "Lima", "Lima"),
+  miraflores: t("150122", "Miraflores", "Lima", "Lima"),
+  barranco: t("150104", "Barranco", "Lima", "Lima"),
 } as const;
 
 const centroids: Record<string, { lat: number; lng: number }> = {
@@ -41,6 +45,9 @@ const centroids: Record<string, { lat: number; lng: number }> = {
   "020101": { lat: -9.5278, lng: -77.5278 },
   "040101": { lat: -16.409, lng: -71.5375 },
   "210101": { lat: -15.8402, lng: -70.0219 },
+  "150108": { lat: -12.1697, lng: -77.0153 },
+  "150122": { lat: -12.1211, lng: -77.0297 },
+  "150104": { lat: -12.149, lng: -77.021 },
 };
 
 export const DEMO_TERRITORIES: Territory[] = Object.values(DEMO_PLACES).map((ref) => ({
@@ -181,6 +188,132 @@ export const DEMO_EVENTS: PublicEvent[] = [
     lastUpdatedAt: hoursAgo(8),
     createdAt: hoursAgo(30),
   },
+  // Chorrillos scenario: the dev seed example for "Cerca de mí" and the quick report.
+  {
+    ...base,
+    id: "DEMO-10",
+    origin: "citizen",
+    reviewStatus: "unverified",
+    publicationStatus: "published",
+    situationStatus: "recent_update",
+    category: "landslide",
+    hazardType: "rockfall",
+    title: "Caída de piedras en la bajada a la Costa Verde",
+    description:
+      "Cayeron piedras del acantilado sobre un carril. Los autos pasan por un solo carril. (Demostración)",
+    place: {
+      precision: "approximate",
+      point: { lat: -12.1588, lng: -77.0268 },
+      territory: DEMO_PLACES.chorrillos,
+      reference: "Bajada de Agua Dulce, carril hacia el sur",
+    },
+    occurredAt: { precision: "exact", start: hoursAgo(0.8), end: null },
+    author: citizen("Vecino de Chorrillos"),
+    contributionCount: 2,
+    publishedAt: hoursAgo(0.75),
+    lastUpdatedAt: hoursAgo(0.2),
+    createdAt: hoursAgo(0.8),
+  },
+  {
+    ...base,
+    id: "DEMO-11",
+    origin: "citizen",
+    reviewStatus: "unverified",
+    publicationStatus: "published",
+    situationStatus: "recent_update",
+    category: "flood",
+    hazardType: "urban_flooding",
+    title: "Aniego por tubería rota",
+    description:
+      "Agua saliendo de la pista. Vecinos dicen que ya cerraron la llave, falta confirmar. (Demostración)",
+    place: {
+      precision: "approximate",
+      point: { lat: -12.1762, lng: -77.0112 },
+      territory: DEMO_PLACES.chorrillos,
+      reference: "Av. Huaylas, cerca del mercado",
+    },
+    occurredAt: { precision: "hour", start: hoursAgo(5), end: null },
+    author: citizen("Bodeguera de la zona"),
+    contributionCount: 1,
+    publishedAt: hoursAgo(4.8),
+    lastUpdatedAt: hoursAgo(0.5),
+    createdAt: hoursAgo(5),
+  },
+  {
+    ...base,
+    id: "DEMO-12",
+    origin: "citizen",
+    reviewStatus: "corroborated_by_review",
+    publicationStatus: "published",
+    situationStatus: "closure_reported",
+    category: "fire",
+    hazardType: "fire",
+    title: "Incendio en un edificio de Miraflores",
+    description:
+      "Incendio en los pisos altos de un edificio. Los bomberos lo controlaron; se reportó el cierre. (Demostración)",
+    place: {
+      precision: "approximate",
+      point: { lat: -12.1192, lng: -77.0338 },
+      territory: DEMO_PLACES.miraflores,
+      reference: "Cerca del parque Kennedy",
+    },
+    occurredAt: { precision: "exact", start: hoursAgo(50), end: null },
+    author: citizen("Vecina de Miraflores"),
+    contributionCount: 6,
+    publishedAt: hoursAgo(49.5),
+    lastUpdatedAt: hoursAgo(44),
+    createdAt: hoursAgo(50),
+  },
+  {
+    ...base,
+    id: "DEMO-13",
+    origin: "citizen",
+    reviewStatus: "with_contributions",
+    publicationStatus: "published",
+    situationStatus: "recent_update",
+    category: "landslide",
+    hazardType: "debris_flow",
+    title: "Huaico baja por la quebrada",
+    description:
+      "Lodo y piedras bajando por la quebrada hacia la carretera Central. (Demostración)",
+    place: {
+      precision: "approximate",
+      point: { lat: -11.9421, lng: -76.7082 },
+      territory: DEMO_PLACES.lurigancho,
+      reference: "Quebrada a la altura del km 34",
+    },
+    occurredAt: { precision: "exact", start: hoursAgo(1.5), end: null },
+    author: citizen("Mototaxista de Chosica"),
+    contributionCount: 4,
+    hasOpenNeeds: true,
+    publishedAt: hoursAgo(1.4),
+    lastUpdatedAt: hoursAgo(0.3),
+    createdAt: hoursAgo(1.5),
+  },
+  {
+    ...base,
+    id: "DEMO-14",
+    origin: "citizen",
+    reviewStatus: "unverified",
+    publicationStatus: "published",
+    situationStatus: "recent_update",
+    category: "road_incident",
+    hazardType: "road_blocked",
+    title: "Vía bloqueada por obra sin señalizar",
+    description: "Un carril cerrado sin conos ni aviso. (Demostración)",
+    place: {
+      precision: "approximate",
+      point: { lat: -12.1655, lng: -77.0189 },
+      territory: DEMO_PLACES.chorrillos,
+      reference: "Av. Defensores del Morro",
+    },
+    occurredAt: { precision: "hour", start: hoursAgo(3), end: null },
+    author: citizen("Conductora de bus"),
+    contributionCount: 0,
+    publishedAt: hoursAgo(2.9),
+    lastUpdatedAt: hoursAgo(1),
+    createdAt: hoursAgo(3),
+  },
 ];
 
 /** DEMO-06 is a pending variant of DEMO-01; it is never listed publicly as another event. */
@@ -315,6 +448,27 @@ export const DEMO_COLLECTION_POINTS: CollectionPoint[] = [
     availabilityConfirmedAt: hoursAgo(48),
     isDemo: true,
     updatedAt: hoursAgo(48),
+  },
+  {
+    id: "ACOPIO-DEMO-02",
+    organizationId: "ORG-DEMO-01",
+    name: "Punto de recepción de ejemplo (Barranco)",
+    address: "Dirección de ejemplo, Barranco",
+    arrivalReference: "A media cuadra del parque municipal (ilustrativo)",
+    location: { lat: -12.1497, lng: -77.0213 },
+    territory: DEMO_PLACES.barranco,
+    schedule: {
+      text: "Todos los días, 8:00 a 18:00 (horario declarado)",
+      confirmedAt: hoursAgo(6),
+    },
+    accepts: ["water", "shelter"],
+    doesNotAccept: null,
+    destinationTerritories: [DEMO_PLACES.chorrillos],
+    contacts: [{ kind: "email", value: "barranco@ejemplo.invalid", isDemo: true }],
+    status: "active",
+    availabilityConfirmedAt: hoursAgo(6),
+    isDemo: true,
+    updatedAt: hoursAgo(6),
   },
 ];
 
@@ -523,5 +677,71 @@ export const DEMO_INGEST_RUNS: ImportRun[] = [
     processed: 0,
     duplicatesAvoided: 0,
     errorSummary: "Source timed out; previous records kept",
+  },
+];
+
+const minutesAgo = (m: number) => hoursAgo(m / 60);
+const signal = (
+  id: string,
+  eventId: string,
+  reporterKey: string,
+  kind: EventSignal["kind"],
+  minutes: number,
+): EventSignal => ({
+  id,
+  eventId,
+  reporterKey,
+  isAnonymous: reporterKey.startsWith("anon-"),
+  kind,
+  createdAt: minutesAgo(minutes),
+  isDemo: true,
+});
+
+/** "¿Sigue ahí?" answers. Counts per event are distinct people (see summarizeSignals). */
+export const DEMO_SIGNALS: EventSignal[] = [
+  // DEMO-10 rockfall: neighbours confirm it is still there.
+  signal("SIG-DEMO-01", "DEMO-10", "user-ana", "still_there", 35),
+  signal("SIG-DEMO-02", "DEMO-10", "user-luis", "still_there", 22),
+  signal("SIG-DEMO-03", "DEMO-10", "anon-7f3a", "still_there", 12),
+  // DEMO-11 aniego: most say it is gone -> "possibly resolved", never closed automatically.
+  signal("SIG-DEMO-04", "DEMO-11", "user-rosa", "not_there", 50),
+  signal("SIG-DEMO-05", "DEMO-11", "user-jorge", "not_there", 40),
+  signal("SIG-DEMO-06", "DEMO-11", "anon-c210", "not_there", 25),
+  signal("SIG-DEMO-07", "DEMO-11", "user-mili", "still_there", 70),
+  // DEMO-13 huaico: getting worse.
+  signal("SIG-DEMO-08", "DEMO-13", "user-pedro", "still_there", 60),
+  signal("SIG-DEMO-09", "DEMO-13", "user-carmen", "worse", 30),
+  signal("SIG-DEMO-10", "DEMO-13", "anon-91be", "worse", 15),
+  // DEMO-12 fire: old answers only -> "no recent signals".
+  signal("SIG-DEMO-11", "DEMO-12", "user-ana", "not_there", 60 * 40),
+  // DEMO-14: one person each way -> "mixed".
+  signal("SIG-DEMO-12", "DEMO-14", "user-luis", "still_there", 45),
+  signal("SIG-DEMO-13", "DEMO-14", "anon-44d0", "not_there", 20),
+];
+
+/**
+ * Anonymous quick reports not yet public: two people reported a fallen tree in Chorrillos. A
+ * third anonymous report nearby makes it visible (ANONYMOUS_MIN_REPORTERS).
+ */
+export const DEMO_QUICK_REPORTS: QuickReport[] = [
+  {
+    id: "QR-DEMO-01",
+    hazardType: "fallen_tree",
+    point: { lat: -12.1712, lng: -77.0166 },
+    note: "Árbol grande sobre la vereda",
+    reporterKey: "anon-a1",
+    isAnonymous: true,
+    createdAt: minutesAgo(40),
+    isDemo: true,
+  },
+  {
+    id: "QR-DEMO-02",
+    hazardType: "fallen_tree",
+    point: { lat: -12.1716, lng: -77.0161 },
+    note: "",
+    reporterKey: "anon-b2",
+    isAnonymous: true,
+    createdAt: minutesAgo(18),
+    isDemo: true,
   },
 ];

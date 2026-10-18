@@ -2,6 +2,7 @@ import { z } from "zod";
 import {
   ACTIVITY_TYPES,
   EVENT_CATEGORIES,
+  HAZARD_TYPES,
   ORIGINS,
   PUBLICATION_STATUSES,
   REPORT_DESCRIPTION_MAX,
@@ -71,6 +72,8 @@ export const publicEventSchema = eventSchema
   .extend({
     versionSeq: z.number().int(),
     category: z.enum(EVENT_CATEGORIES),
+    /** What people called it ("huaico", "aniego"). Optional until the API stores it. */
+    hazardType: z.enum(HAZARD_TYPES).nullable().optional(),
     title: z.string(),
     description: z.string(),
     place: placeSchema,
