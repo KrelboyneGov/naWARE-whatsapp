@@ -1,3 +1,5 @@
+import type { IOfficialNoticesFeed } from "@emergency-map/domain/repositories";
+
 /**
  * Current SENAMHI weather notices, read from the public HTML list at
  * https://www.senamhi.gob.pe/?p=aviso-meteorologico. There is no verified API, so
@@ -90,7 +92,9 @@ export function sortByLevel(notices: SenamhiNotice[]): SenamhiNotice[] {
   );
 }
 
-export function createSenamhiNoticesSource(fetchImpl: typeof fetch = fetch) {
+export function createSenamhiNoticesSource(
+  fetchImpl: typeof fetch = fetch,
+): IOfficialNoticesFeed & { listCurrent(): Promise<SenamhiNoticesResult> } {
   return {
     async listCurrent(): Promise<SenamhiNoticesResult> {
       const fetchedAt = new Date().toISOString();

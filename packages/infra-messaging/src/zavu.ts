@@ -201,18 +201,27 @@ export function createOpenAiCompatibleLlm(options: OpenAiLlmOptions): ILlmPort {
 
   return {
     async complete(input): Promise<LlmCompletion> {
-      const response = await fetchImpl(`${baseUrl}/chat/completions`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${options.apiKey}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          model,
-          messages: input.messages.map(toOpenAiMessage),
-          tools: input.tools.map(toOpenAiTool),
-        }),
-      });
+      let response: Response;
+      try {
+        response = await fetchImpl(`${baseUrl}/chat/completions`, {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${options.apiKey}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            model,
+            temperature: 0.3,
+            messages: input.messages.map(toOpenAiMessage),
+            tools: input.tools.map(toOpenAiTool),
+          }),
+        });
+      } catch {
+        return {
+          kind: "message",
+          text: "No tengo información confirmada: el modelo de lenguaje no respondió.",
+        };
+      }
       if (!response.ok) {
         return {
           kind: "message",
@@ -244,9 +253,28 @@ export function createOpenAiCompatibleLlm(options: OpenAiLlmOptions): ILlmPort {
   };
 }
 
-function toOpenAiMessage(message: LlmMessage): Record<string, unknown> {
+/**
+ * OpenAI chat format: a tool result must follow the assistant message that requested it and
+ * carry that call's id. Results without the assistant `tool_calls` message are rejected (400).
+ */
+export function toOpenAiMessage(message: LlmMessage): Record<string, unknown> {
   if (message.role === "tool") {
-    return { role: "tool", content: message.content, tool_call_id: message.name ?? "tool" };
+    return {
+      role: "tool",
+      content: message.content,
+      tool_call_id: message.toolCallId ?? message.name ?? "tool",
+    };
+  }
+  if (message.role === "assistant" && message.toolCalls && message.toolCalls.length > 0) {
+    return {
+      role: "assistant",
+      content: message.content || null,
+      tool_calls: message.toolCalls.map((call) => ({
+        id: call.id,
+        type: "function",
+        function: { name: call.name, arguments: JSON.stringify(call.arguments) },
+      })),
+    };
   }
   return { role: message.role, content: message.content };
 }

@@ -7,7 +7,7 @@ import {
   redactPhones,
 } from "@emergency-map/domain/rules";
 import { verifyZavuSignature } from "@emergency-map/domain/rules";
-import { isGreetingOnly, runAgent } from "./agent";
+import { isGreetingOnly, runAgent, type ConversationTurn } from "./agent";
 import type { MessagingDeps } from "./deps";
 import { dispatchDue } from "./dispatch";
 import { enqueueOutbound } from "./follow-up";
@@ -89,11 +89,33 @@ export async function handleInboundMessage(
     text: input.text,
     homeDistrictName: fresh.homeDistrictName,
     homeUbigeo: fresh.homeUbigeo,
+    history: await recentHistory(deps, fresh.id, input.messageId),
   });
   const reply = firstContact ? `${welcome}\n\n${turn.reply}` : turn.reply;
   await persistTurn(deps, fresh, reply, turn, input.messageId);
   await dispatchDue(deps);
   return { reply, matched: true, toolNames: turn.toolNames };
+}
+
+/** Last turns of the conversation, decrypted, without the message being answered now. */
+async function recentHistory(
+  deps: MessagingDeps,
+  subscriberId: string,
+  currentMessageId: string,
+): Promise<ConversationTurn[]> {
+  const messages = (await deps.store.listMessages(subscriberId))
+    .filter((message) => message.externalMessageId !== currentMessageId)
+    .slice(-8);
+  const turns: ConversationTurn[] = [];
+  for (const message of messages) {
+    try {
+      const content = await deps.cipher.decrypt(message.bodyCiphertext);
+      turns.push({ role: message.direction === "in" ? "user" : "assistant", content });
+    } catch {
+      // An erased or unreadable message is skipped, not guessed.
+    }
+  }
+  return turns;
 }
 
 async function optOut(deps: MessagingDeps, subscriber: Subscriber, now: Date): Promise<string> {

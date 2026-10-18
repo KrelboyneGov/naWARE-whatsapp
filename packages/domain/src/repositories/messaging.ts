@@ -59,7 +59,12 @@ export interface INotificationPort {
 export interface LlmMessage {
   role: "system" | "user" | "assistant" | "tool";
   content: string;
+  /** Tool name, on role "tool". */
   name?: string;
+  /** Id of the call this result answers, on role "tool". */
+  toolCallId?: string;
+  /** Calls the assistant asked for, on role "assistant". */
+  toolCalls?: LlmToolCall[];
 }
 
 export interface LlmToolDefinition {
@@ -86,6 +91,7 @@ export interface ForecastQuery {
   placeName: string;
   latitude: number | null;
   longitude: number | null;
+  /** YYYY-MM-DD in Lima. The snapshot is for this day or unavailable, never another day. */
   date: string;
 }
 
@@ -96,8 +102,34 @@ export interface ForecastSnapshot {
   fetchedAt: string | null;
   summary: string | null;
   precipitationProbabilityMax: number | null;
+  /** The day the numbers belong to (YYYY-MM-DD). */
+  forDate: string | null;
+  precipitationSumMm: number | null;
+  temperatureMaxC: number | null;
+  temperatureMinC: number | null;
+  /** Department (region) of the geocoded place, e.g. "Arequipa". */
+  region: string | null;
   /** Why `available` is false. */
   reason: string | null;
+}
+
+/** A current SENAMHI weather notice, with the issuer's own level. Covers macro-regions, not districts. */
+export interface LiveOfficialNotice {
+  number: string;
+  title: string;
+  level: "amarillo" | "naranja" | "rojo";
+  validFrom: string;
+  validTo: string;
+  url: string;
+}
+
+export type LiveOfficialNotices =
+  | { available: true; fetchedAt: string; notices: LiveOfficialNotice[] }
+  | { available: false; fetchedAt: string; reason: string };
+
+/** Current SENAMHI notices read live from senamhi.gob.pe. */
+export interface IOfficialNoticesFeed {
+  listCurrent(): Promise<LiveOfficialNotices>;
 }
 
 export interface IForecastPort {

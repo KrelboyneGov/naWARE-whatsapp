@@ -32,6 +32,9 @@ export type {
   LlmCompletion,
   ForecastQuery,
   ForecastSnapshot,
+  IOfficialNoticesFeed,
+  LiveOfficialNotice,
+  LiveOfficialNotices,
 } from "./messaging";
 
 import type { ITodoRepository } from "./todo.repository";

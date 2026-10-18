@@ -12,6 +12,7 @@ import { MessagingRepository } from "@emergency-map/infra-db/repositories";
 import {
   createOpenAiCompatibleLlm,
   createOpenMeteoForecast,
+  createSenamhiNoticesSource,
   createZavuNotifier,
 } from "@emergency-map/infra-messaging";
 import { env } from "../env";
@@ -66,6 +67,7 @@ export function getMessagingDeps(): MessagingDeps {
     }),
     llm,
     forecast: createOpenMeteoForecast(),
+    officialFeed: createSenamhiNoticesSource(),
     log: {
       info(message) {
         console.info(message);

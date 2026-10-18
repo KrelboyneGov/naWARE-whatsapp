@@ -86,3 +86,29 @@ describe("Zavu WhatsApp sender", () => {
     expect(lines.join("\n")).not.toContain("+51987654321");
   });
 });
+
+describe("OpenAI message format", () => {
+  it("sends the assistant tool_calls and links each result by its call id", async () => {
+    const { toOpenAiMessage } = await import("./zavu");
+    expect(
+      toOpenAiMessage({
+        role: "assistant",
+        content: "",
+        toolCalls: [{ id: "call_1", name: "pronostico", arguments: { date: "2026-10-24" } }],
+      }),
+    ).toEqual({
+      role: "assistant",
+      content: null,
+      tool_calls: [
+        {
+          id: "call_1",
+          type: "function",
+          function: { name: "pronostico", arguments: '{"date":"2026-10-24"}' },
+        },
+      ],
+    });
+    expect(
+      toOpenAiMessage({ role: "tool", name: "pronostico", toolCallId: "call_1", content: "{}" }),
+    ).toEqual({ role: "tool", content: "{}", tool_call_id: "call_1" });
+  });
+});

@@ -60,3 +60,6 @@ out/
 
 # lefthook per-developer overrides (never committed)
 lefthook-local.yml
+
+# Conversation eval transcripts (may contain live data)
+apps/server-hono/eval/

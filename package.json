@@ -29,7 +29,8 @@
     "db:migrate": "dotenvx run -f apps/server-hono/.env -- turbo run db:migrate -F @emergency-map/infra-db",
     "db:seed": "dotenvx run -f apps/server-hono/.env -- pnpm --filter @emergency-map/infra-db run db:seed",
     "whatsapp:templates": "node --experimental-strip-types scripts/submit-whatsapp-templates.ts",
-    "demo:notify": "pnpm --filter server-hono run demo:notify"
+    "demo:notify": "pnpm --filter server-hono run demo:notify",
+    "eval:conversations": "pnpm --filter server-hono run eval:conversations"
   },
   "dependencies": {
     "zod": "catalog:"

@@ -2,6 +2,7 @@ import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { OpenAPIHandler } from "@orpc/openapi/fetch";
 import { AGENT_TOOLS, callAgentTool, handleZavuWebhook } from "@emergency-map/application";
+import { resolveTargetDate } from "@emergency-map/domain/rules";
 import { auth } from "./lib/auth";
 import { appRouter } from "./router";
 import { env } from "./env";
@@ -80,7 +81,7 @@ app.post("/api/v1/internal/agent/tools", async (c) => {
       body.name,
       body.arguments ?? {},
       { name: body.home?.name ?? "hogar", ubigeo: body.home?.ubigeo ?? null },
-      body.dayLabel ?? "hoy",
+      resolveTargetDate(body.dayLabel ?? "hoy", new Date()),
     );
     return c.json({ result });
   }

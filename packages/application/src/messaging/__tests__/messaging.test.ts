@@ -91,13 +91,18 @@ function harness(options?: {
     notifications,
     llm: createDeterministicClimateLlm(),
     forecast: {
-      async forecast() {
+      async forecast(query) {
         return {
           available: true,
           source: "Open-Meteo",
           fetchedAt: now.toISOString(),
           summary: "probabilidad de lluvia baja",
           precipitationProbabilityMax: 10,
+          forDate: query.date,
+          precipitationSumMm: 0,
+          temperatureMaxC: 30,
+          temperatureMinC: 22,
+          region: "Piura",
           reason: null,
         };
       },

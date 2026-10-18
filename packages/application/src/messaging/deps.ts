@@ -8,6 +8,7 @@ import type {
   IMessagingStore,
   INotificationPort,
   IOfficialNoticeRepository,
+  IOfficialNoticesFeed,
   IOrganizationRepository,
   ITerritoryRepository,
 } from "@emergency-map/domain/repositories";
@@ -21,6 +22,8 @@ export interface MessagingDeps {
   notifications: INotificationPort;
   llm: ILlmPort;
   forecast: IForecastPort;
+  /** Live SENAMHI notices. Optional: without it the agent says it could not check them. */
+  officialFeed?: IOfficialNoticesFeed;
   log: ILog;
   territories: Pick<ITerritoryRepository, "search" | "findByUbigeo" | "findDistrictAt">;
   notices: Pick<IOfficialNoticeRepository, "findIntersectingTerritory">;

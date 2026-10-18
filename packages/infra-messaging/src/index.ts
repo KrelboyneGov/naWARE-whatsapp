@@ -5,8 +5,9 @@ export {
   classifyZavuFailure,
   createOpenAiCompatibleLlm,
   createZavuNotifier,
+  toOpenAiMessage,
 } from "./zavu";
-export { createOpenMeteoForecast } from "./forecast";
+export { createOpenMeteoForecast, FORECAST_HORIZON_DAYS } from "./forecast";
 export {
   createSenamhiNoticesSource,
   isRainNotice,
