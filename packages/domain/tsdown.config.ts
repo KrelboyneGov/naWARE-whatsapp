@@ -11,6 +11,7 @@ export default defineConfig({
     // `@emergency-map/domain/testing`. tsdown owns the exports map via
     // `devExports`, so a subpath only survives if it is an entry here.
     testing: "src/testing/index.ts",
+    demo: "src/demo/index.ts",
   },
 
   exports: {

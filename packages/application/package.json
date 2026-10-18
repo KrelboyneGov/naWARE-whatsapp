@@ -14,16 +14,30 @@
     "src"
   ],
   "type": "module",
-  "main": "./dist/todos.mjs",
-  "module": "./dist/todos.mjs",
-  "types": "./dist/todos.d.mts",
+  "main": "./dist/index.mjs",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.mts",
   "exports": {
-    ".": "./src/todos/index.ts",
+    ".": "./src/index.ts",
+    "./events": "./src/events/index.ts",
+    "./evidence": "./src/evidence/index.ts",
+    "./help": "./src/help/index.ts",
+    "./review": "./src/review/index.ts",
+    "./sources": "./src/sources/index.ts",
+    "./territory": "./src/territory/index.ts",
+    "./todos": "./src/todos/index.ts",
     "./package.json": "./package.json"
   },
   "publishConfig": {
     "exports": {
-      ".": "./dist/todos.mjs",
+      ".": "./dist/index.mjs",
+      "./events": "./dist/events.mjs",
+      "./evidence": "./dist/evidence.mjs",
+      "./help": "./dist/help.mjs",
+      "./review": "./dist/review.mjs",
+      "./sources": "./dist/sources.mjs",
+      "./territory": "./dist/territory.mjs",
+      "./todos": "./dist/todos.mjs",
       "./package.json": "./package.json"
     }
   },

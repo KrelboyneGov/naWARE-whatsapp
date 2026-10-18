@@ -108,3 +108,15 @@ src/
 | pgEnums            | 4     |
 | Drizzle tables     | 5     |
 | Exported types     | 7     |
+
+---
+
+## Core domain persistence (added with the core-logic spec)
+
+- `schema/`: `territory`, `event` (+ `event_version`, `activity`), `evidence`, `review` (queue, decisions, issue reports), `source` (data sources, import runs, official notices), `help` (organizations, members, collection points, needs). Every product table has `is_demo`. Auth tables gained the Better Auth admin columns (`user.role/banned/ban_reason/ban_expires`, `session.impersonated_by`).
+- `utils/postgis.ts`: `geometryPoint` / `geometryMultiPolygon` custom types (write via `ST_MakePoint` / `ST_Multi(ST_GeomFromGeoJSON)`), `geoJson(column)` for reads, `pointSql`, `distanceKm`. Geometry columns must be selected with `geoJson()`.
+- `events.private_location` is never selected by list/candidate queries; only `findById` reads it.
+- `mappers/` map rows to domain types; `repositories/` implement every domain interface; `createRepositories(db)` returns the `Repositories` aggregate.
+- neon-http has no interactive transactions, so multi-statement writes use `db.batch`.
+- Migrations: `0001_postgis` (extension), `0002_core_domain`.
+- `seed/index.ts`: idempotent demo load, run with `pnpm run db:seed` from the root.

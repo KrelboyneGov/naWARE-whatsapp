@@ -4,6 +4,7 @@ import { OpenAPIHandler } from "@orpc/openapi/fetch";
 import { auth } from "./lib/auth";
 import { appRouter } from "./router";
 import { env } from "./env";
+import { createContext } from "./lib/actor";
 
 const app = new Hono();
 
@@ -35,7 +36,7 @@ const openAPIHandler = new OpenAPIHandler(appRouter);
 app.all("/api/v1/*", async (c) => {
   const { matched, response } = await openAPIHandler.handle(c.req.raw, {
     prefix: "/api/v1",
-    context: { headers: c.req.raw.headers },
+    context: createContext(c.req.raw.headers),
   });
 
   if (matched) return response;

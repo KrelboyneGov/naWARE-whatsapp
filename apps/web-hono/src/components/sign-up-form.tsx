@@ -1,23 +1,24 @@
 import { useForm } from "@tanstack/react-form";
-import { useNavigate, useRouter } from "@tanstack/react-router";
-import { toast } from "sonner";
+import { useRouter } from "@tanstack/react-router";
+import { useState } from "react";
 import z from "zod";
-
+import { Button, Input } from "@emergency-map/web-ui";
+import { FieldShell } from "@/components/layout/auth-card";
 import { authClient } from "@/lib/auth/auth-client";
 
-import { Button, Input, Label } from "@emergency-map/web-ui";
-
-export default function SignUpForm() {
-  const navigate = useNavigate();
+/** `redirectTo` is a same-site path validated by the route; defaults to "/". */
+export default function SignUpForm({ redirectTo = "/" }: { redirectTo?: string }) {
   const router = useRouter();
+  const [formError, setFormError] = useState<string | null>(null);
 
   const form = useForm({
     defaultValues: {
+      name: "",
       email: "",
       password: "",
-      name: "",
     },
     onSubmit: async ({ value }) => {
+      setFormError(null);
       await authClient.signUp.email(
         {
           email: value.email,
@@ -27,116 +28,110 @@ export default function SignUpForm() {
         {
           onSuccess: async () => {
             await router.invalidate();
-            navigate({ to: "/todos" });
-            toast.success("Sign up successful");
+            router.history.push(redirectTo);
           },
           onError: (error) => {
-            toast.error(error.error.message || error.error.statusText);
+            setFormError(
+              error.error.status === 422 || error.error.status === 400
+                ? "No pudimos crear la cuenta. Revisa los datos o prueba con otro correo."
+                : "No pudimos crear la cuenta. Inténtalo de nuevo.",
+            );
           },
         },
       );
     },
     validators: {
       onSubmit: z.object({
-        name: z.string().min(2, "Name must be at least 2 characters"),
-        email: z.email("Invalid email address"),
-        password: z.string().min(8, "Password must be at least 8 characters"),
+        name: z.string().trim().min(2, "Ingresa tu nombre (mínimo 2 caracteres)"),
+        email: z.email("Ingresa un correo electrónico válido"),
+        password: z.string().min(8, "La contraseña debe tener al menos 8 caracteres"),
       }),
     },
   });
 
   return (
-    <>
-      <h1 className="mb-6 text-center text-3xl font-bold">Create Account</h1>
+    <form
+      noValidate
+      onSubmit={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        form.handleSubmit();
+      }}
+      className="space-y-4"
+    >
+      <form.Field name="name">
+        {(field) => (
+          <FieldShell id={field.name} label="Nombre" errors={field.state.meta.errors}>
+            <Input
+              id={field.name}
+              name={field.name}
+              autoComplete="name"
+              className="h-11 text-base"
+              aria-invalid={field.state.meta.errors.length > 0}
+              value={field.state.value}
+              onBlur={field.handleBlur}
+              onChange={(e) => field.handleChange(e.target.value)}
+            />
+          </FieldShell>
+        )}
+      </form.Field>
 
-      <form
-        onSubmit={(e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          form.handleSubmit();
-        }}
-        className="space-y-4"
-      >
-        <div>
-          <form.Field name="name">
-            {(field) => (
-              <div className="space-y-2">
-                <Label htmlFor={field.name}>Name</Label>
-                <Input
-                  id={field.name}
-                  name={field.name}
-                  value={field.state.value}
-                  onBlur={field.handleBlur}
-                  onChange={(e) => field.handleChange(e.target.value)}
-                />
-                {field.state.meta.errors.map((error) => (
-                  <p key={error?.message} className="text-red-500">
-                    {error?.message}
-                  </p>
-                ))}
-              </div>
-            )}
-          </form.Field>
-        </div>
+      <form.Field name="email">
+        {(field) => (
+          <FieldShell id={field.name} label="Correo electrónico" errors={field.state.meta.errors}>
+            <Input
+              id={field.name}
+              name={field.name}
+              type="email"
+              autoComplete="email"
+              className="h-11 text-base"
+              aria-invalid={field.state.meta.errors.length > 0}
+              value={field.state.value}
+              onBlur={field.handleBlur}
+              onChange={(e) => field.handleChange(e.target.value)}
+            />
+          </FieldShell>
+        )}
+      </form.Field>
 
-        <div>
-          <form.Field name="email">
-            {(field) => (
-              <div className="space-y-2">
-                <Label htmlFor={field.name}>Email</Label>
-                <Input
-                  id={field.name}
-                  name={field.name}
-                  type="email"
-                  value={field.state.value}
-                  onBlur={field.handleBlur}
-                  onChange={(e) => field.handleChange(e.target.value)}
-                />
-                {field.state.meta.errors.map((error) => (
-                  <p key={error?.message} className="text-red-500">
-                    {error?.message}
-                  </p>
-                ))}
-              </div>
-            )}
-          </form.Field>
-        </div>
+      <form.Field name="password">
+        {(field) => (
+          <FieldShell id={field.name} label="Contraseña" errors={field.state.meta.errors}>
+            <Input
+              id={field.name}
+              name={field.name}
+              type="password"
+              autoComplete="new-password"
+              className="h-11 text-base"
+              aria-invalid={field.state.meta.errors.length > 0}
+              value={field.state.value}
+              onBlur={field.handleBlur}
+              onChange={(e) => field.handleChange(e.target.value)}
+            />
+          </FieldShell>
+        )}
+      </form.Field>
 
-        <div>
-          <form.Field name="password">
-            {(field) => (
-              <div className="space-y-2">
-                <Label htmlFor={field.name}>Password</Label>
-                <Input
-                  id={field.name}
-                  name={field.name}
-                  type="password"
-                  value={field.state.value}
-                  onBlur={field.handleBlur}
-                  onChange={(e) => field.handleChange(e.target.value)}
-                />
-                {field.state.meta.errors.map((error) => (
-                  <p key={error?.message} className="text-red-500">
-                    {error?.message}
-                  </p>
-                ))}
-              </div>
-            )}
-          </form.Field>
-        </div>
+      {formError && (
+        <p
+          role="alert"
+          className="rounded-lg border border-error/30 bg-error-bg px-3 py-2 text-sm font-medium text-error"
+        >
+          {formError}
+        </p>
+      )}
 
-        <form.Subscribe>
-          {(state) => (
-            <Button
-              type="submit"
-              className="w-full"
-              disabled={!state.canSubmit || state.isSubmitting}
-            >
-              {state.isSubmitting ? "Submitting..." : "Sign Up"}
-            </Button>
-          )}
-        </form.Subscribe>
-      </form>
-    </>
+      <form.Subscribe>
+        {(state) => (
+          <Button
+            type="submit"
+            className="h-11 w-full text-base font-semibold"
+            disabled={!state.canSubmit || state.isSubmitting}
+          >
+            {state.isSubmitting ? "Creando cuenta..." : "Crear cuenta"}
+          </Button>
+        )}
+      </form.Subscribe>
+    </form>
   );
 }

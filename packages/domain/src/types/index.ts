@@ -15,3 +15,6 @@ export type { ApiResponse, PaginatedResult, PaginationResult } from "./api-respo
 // Re-export schema-derived types for convenience
 // (source of truth lives in domain/schemas/pagination.ts)
 export type { PaginationQuery, PaginationMeta } from "../schemas/pagination";
+
+export type { DomainError } from "./errors";
+export { ok, err } from "./errors";

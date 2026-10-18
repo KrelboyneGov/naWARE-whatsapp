@@ -1,1 +1,100 @@
 @import "@emergency-map/web-ui/styles.css";
+
+/*
+ * Andes Alerta visual system (design doc 02). Light mode only: the `.dark` class is never set,
+ * so the dark block inherited from web-ui is inert. Brand tokens are named, then mapped onto
+ * the shadcn variables below.
+ */
+:root {
+  --bg-app: #f7f8fa;
+  --bg-surface: #ffffff;
+  --text-main: #172b3a;
+  --text-secondary: #526373;
+  --line: #dce3e8;
+  --brand: #175cd3;
+  --brand-soft: #eff5ff;
+  --help: #087f75;
+  --warning: #8a5700;
+  --warning-bg: #fff6db;
+  --error: #b42318;
+  --error-bg: #fff1f0;
+
+  --background: var(--bg-app);
+  --foreground: var(--text-main);
+  --card: var(--bg-surface);
+  --card-foreground: var(--text-main);
+  --popover: var(--bg-surface);
+  --popover-foreground: var(--text-main);
+  --primary: var(--brand);
+  --primary-foreground: #ffffff;
+  --secondary: var(--brand-soft);
+  --secondary-foreground: var(--brand);
+  --muted: #eef1f4;
+  --muted-foreground: var(--text-secondary);
+  --accent: var(--brand-soft);
+  --accent-foreground: var(--brand);
+  --destructive: var(--error);
+  --border: var(--line);
+  --input: var(--line);
+  --ring: var(--brand);
+  --radius: 0.75rem;
+}
+
+@theme inline {
+  --font-sans: "Public Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-heading: "Manrope", "Public Sans", ui-sans-serif, system-ui, sans-serif;
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --color-help: var(--help);
+  --color-warning: var(--warning);
+  --color-warning-bg: var(--warning-bg);
+  --color-error: var(--error);
+  --color-error-bg: var(--error-bg);
+  --color-brand-soft: var(--brand-soft);
+}
+
+@layer base {
+  html {
+    color-scheme: light;
+  }
+  body {
+    background: var(--bg-app);
+    color: var(--text-main);
+    font-family: var(--font-sans);
+    font-size: 16px;
+    line-height: 1.55;
+  }
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-heading);
+    letter-spacing: -0.01em;
+  }
+  .tabular {
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+@layer base {
+  .maplibregl-popup-content {
+    @apply bg-transparent! shadow-none! p-0! rounded-none!;
+  }
+  .maplibregl-popup-tip {
+    @apply hidden!;
+  }
+  .maplibregl-ctrl-attrib {
+    @apply bg-background! text-muted-foreground! border-border! rounded-md! border! shadow-sm!;
+  }
+  .maplibregl-ctrl-attrib a {
+    @apply text-muted-foreground!;
+  }
+  .maplibregl-ctrl-attrib a:hover {
+    @apply text-foreground!;
+  }
+  .maplibregl-ctrl-attrib-button {
+    @apply bg-transparent! dark:invert;
+  }
+}
