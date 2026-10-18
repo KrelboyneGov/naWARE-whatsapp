@@ -1,4 +1,5 @@
 import { Link } from "@tanstack/react-router";
+import { User } from "lucide-react";
 
 import {
   DropdownMenu,
@@ -8,9 +9,9 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-  Button,
   buttonVariants,
 } from "@emergency-map/web-ui";
+import { ACCOUNT_LINKS, INTERNAL_LINKS, SIGNED_IN_LINKS, isInternalRole } from "./layout/nav-items";
 import { useSignOut } from "@/hooks/use-session";
 import { cn } from "@/lib/utils";
 import type { AuthSession } from "@/lib/auth/types";
@@ -18,35 +19,62 @@ import type { AuthSession } from "@/lib/auth/types";
 interface UserMenuProps {
   userName: AuthSession["user"]["name"];
   userEmail: AuthSession["user"]["email"];
+  userRole?: string | null;
   isAuthenticated: boolean;
 }
 
-export default function UserMenu({ userName, userEmail, isAuthenticated }: UserMenuProps) {
+const triggerClass = cn(
+  buttonVariants({ variant: "outline" }),
+  "size-[34px] rounded-lg border-border-subtle bg-surface-card p-0 text-text-primary hover:bg-surface-hover",
+);
+
+export default function UserMenu({
+  userName,
+  userEmail,
+  userRole,
+  isAuthenticated,
+}: UserMenuProps) {
   const signOut = useSignOut();
 
   if (!isAuthenticated) {
     return (
       <Link
         to="/auth/login"
-        className={cn(buttonVariants({ variant: "outline" }), "h-10 px-4 text-sm font-medium")}
+        aria-label="Cuenta: ingresar"
+        title="Ingresar"
+        className={triggerClass}
       >
-        Ingresar
+        <User className="size-4" aria-hidden />
       </Link>
     );
   }
 
+  const links = [
+    ...SIGNED_IN_LINKS,
+    ...ACCOUNT_LINKS,
+    ...(isInternalRole(userRole) ? INTERNAL_LINKS : []),
+  ];
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger
-        render={<Button variant="outline" className="h-10 max-w-48 px-4 text-sm" />}
+        aria-label={`Cuenta de ${userName}`}
+        title={userName}
+        className={triggerClass}
       >
-        <span className="truncate">{userName}</span>
+        <User className="size-4" aria-hidden />
       </DropdownMenuTrigger>
       <DropdownMenuContent className="min-w-[240px] bg-card">
         <DropdownMenuGroup>
-          <DropdownMenuLabel>Mi cuenta</DropdownMenuLabel>
+          <DropdownMenuLabel>{userName || "Mi cuenta"}</DropdownMenuLabel>
+          <DropdownMenuItem disabled>{userEmail}</DropdownMenuItem>
           <DropdownMenuSeparator />
-          <DropdownMenuItem>{userEmail}</DropdownMenuItem>
+          {links.map(({ to, label }) => (
+            <DropdownMenuItem key={to} render={<Link to={to as "/"} />}>
+              {label}
+            </DropdownMenuItem>
+          ))}
+          <DropdownMenuSeparator />
           <DropdownMenuItem variant="destructive" onClick={() => signOut.mutate()}>
             Cerrar sesión
           </DropdownMenuItem>

@@ -1,7 +1,7 @@
 import type { SubmitReportInput } from "@emergency-map/domain/schemas";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { Check } from "lucide-react";
+import { Check, CheckCircle2, TriangleAlert } from "lucide-react";
 import {
   Alert,
   AlertDescription,
@@ -173,16 +173,23 @@ export function ReportForm({ isAuthenticated }: { isAuthenticated: boolean }) {
 
   if (result) {
     return (
-      <div className="flex flex-col gap-4 rounded-md border p-5" role="status">
+      <div
+        className="mx-auto flex max-w-2xl flex-col items-start gap-3 rounded-2xl border p-6"
+        role="status"
+      >
+        <CheckCircle2 className="size-7" aria-hidden />
         <h2 ref={headingRef} className="text-xl font-semibold">
           Recibimos tu reporte
         </h2>
-        <p className="text-sm">
-          Identificador: <strong>{result.id}</strong>
-        </p>
-        <p className="text-sm">
-          Estado: <strong>{PUBLICATION_LABELS.pending_review}</strong>. Pasará por controles antes
-          de publicarse y aún no es una alerta ni está corroborado.
+        <div className="flex items-center gap-2">
+          <span className="font-mono text-sm">{result.id}</span>
+          <span className="rounded-md bg-muted px-2 py-0.5 text-[13px] font-medium">
+            {PUBLICATION_LABELS.pending_review}
+          </span>
+        </div>
+        <p className="text-muted-foreground text-sm text-pretty">
+          Pasará por controles de publicación. Publicarlo no significa que el hecho esté comprobado;
+          su revisión se mostrará por separado. Aún no es una alerta ni está corroborado.
         </p>
         {result.simulated && (
           <Alert>
@@ -192,9 +199,14 @@ export function ReportForm({ isAuthenticated }: { isAuthenticated: boolean }) {
             </AlertDescription>
           </Alert>
         )}
-        <Link to="/mapa" className={cn(buttonVariants(), "w-fit")}>
-          Volver al mapa
-        </Link>
+        <div className="flex gap-2">
+          <Link to={"/mis-reportes" as "/"} className={cn(buttonVariants())}>
+            Ver seguimiento
+          </Link>
+          <Link to="/mapa" className={cn(buttonVariants({ variant: "outline" }))}>
+            Volver al mapa
+          </Link>
+        </div>
       </div>
     );
   }
@@ -203,146 +215,197 @@ export function ReportForm({ isAuthenticated }: { isAuthenticated: boolean }) {
   const anchor = (k: string) =>
     k === "form" ? undefined : `#field-${k === "place" ? "place" : k}`;
 
-  return (
-    <div className="flex flex-col gap-6">
-      {restored && (
-        <Alert>
-          <AlertTitle>Recuperamos tu borrador</AlertTitle>
-          <AlertDescription>
-            Estaba guardado en este dispositivo. Las fotos no se guardan: vuelve a elegirlas.{" "}
-            <button type="button" className="underline" onClick={discard}>
-              Empezar de nuevo
-            </button>
-          </AlertDescription>
-        </Alert>
-      )}
-
-      <nav aria-label="Pasos del reporte">
-        <p className="text-muted-foreground text-sm sm:hidden">
-          Paso {draft.step} de 4 · {STEPS[draft.step - 1]}
-        </p>
-        <ol className="hidden gap-2 sm:flex">
-          {STEPS.map((label, i) => {
-            const n = (i + 1) as ReportDraft["step"];
-            const done = n < draft.step;
-            const current = n === draft.step;
-            return (
-              <li key={label} className="flex-1" aria-current={current ? "step" : undefined}>
-                <button
-                  type="button"
-                  disabled={!done}
-                  onClick={() => goTo(n)}
+  const stepper = (
+    <nav aria-label="Pasos del reporte">
+      {/* Phones: a progress bar; the step name is already the form's h2. */}
+      <ol className="grid grid-cols-4 gap-1.5 lg:hidden" aria-hidden>
+        {STEPS.map((label, i) => (
+          <li
+            key={label}
+            className={cn("h-1 rounded-full", i < draft.step ? "bg-primary" : "bg-muted")}
+          />
+        ))}
+      </ol>
+      <ol className="hidden gap-1 lg:grid">
+        {STEPS.map((label, i) => {
+          const n = (i + 1) as ReportDraft["step"];
+          const done = n < draft.step;
+          const current = n === draft.step;
+          return (
+            <li key={label} aria-current={current ? "step" : undefined}>
+              <button
+                type="button"
+                disabled={!done}
+                onClick={() => goTo(n)}
+                className={cn(
+                  "flex w-full items-center gap-3 rounded-lg px-2.5 py-2 text-left text-sm font-medium",
+                  current
+                    ? "bg-[var(--surface-quiet)] text-foreground"
+                    : "text-[var(--text-secondary)]",
+                  done && "cursor-pointer hover:bg-[var(--surface-quiet)]",
+                )}
+              >
+                <span
                   className={cn(
-                    "flex w-full items-center gap-2 border-b-2 pb-2 text-left text-sm",
-                    current ? "border-primary font-medium" : "border-border text-muted-foreground",
+                    "flex size-6 items-center justify-center rounded-full border font-mono text-xs",
+                    current && "border-primary bg-primary text-primary-foreground",
+                    done && "border-primary text-primary",
                   )}
                 >
-                  <span
-                    className={cn(
-                      "flex size-6 items-center justify-center rounded-full border text-xs",
-                      current && "bg-primary text-primary-foreground",
+                  {done ? <Check className="size-3.5" aria-hidden /> : n}
+                </span>
+                {label}
+                {done && <span className="sr-only"> (completado, volver)</span>}
+              </button>
+            </li>
+          );
+        })}
+      </ol>
+    </nav>
+  );
+
+  return (
+    <div className="grid items-start gap-8 lg:grid-cols-[240px_minmax(0,1fr)] lg:gap-12">
+      <aside className="grid gap-4 lg:sticky lg:top-6 lg:gap-6">
+        <div className="grid gap-1.5">
+          <h1 className="text-[22px] leading-[1.18] font-semibold tracking-tight lg:text-[26px]">
+            Cuéntanos qué está pasando
+          </h1>
+          <p className="hidden text-sm text-[var(--text-secondary)] text-pretty sm:block">
+            Comparte lo que observaste y dónde ocurrió. Tu aporte pasará por controles antes de
+            publicarse.
+          </p>
+        </div>
+        {stepper}
+        <div className="grid gap-1.5 rounded-xl border border-[var(--border-subtle)] p-3 text-[13px] text-[var(--text-secondary)]">
+          <span className="text-warning inline-flex items-start gap-1.5 font-medium">
+            <TriangleAlert className="mt-0.5 size-3.5 shrink-0" aria-hidden />
+            No te acerques a una zona peligrosa para obtener evidencia.
+          </span>
+          <span>
+            El borrador se guarda solo en este dispositivo y puede perderse al cerrar el navegador.
+          </span>
+          <span aria-live="polite" className="text-primary">
+            {savedNote}
+          </span>
+        </div>
+        <Button
+          variant="ghost"
+          className="hidden justify-start lg:inline-flex"
+          onClick={saveAndExit}
+        >
+          Guardar borrador y salir
+        </Button>
+      </aside>
+
+      <div className="flex min-w-0 flex-col gap-6">
+        {restored && (
+          <Alert>
+            <AlertTitle>Recuperamos tu borrador</AlertTitle>
+            <AlertDescription>
+              Estaba guardado en este dispositivo. Las fotos no se guardan: vuelve a elegirlas.{" "}
+              <button type="button" className="underline" onClick={discard}>
+                Empezar de nuevo
+              </button>
+            </AlertDescription>
+          </Alert>
+        )}
+
+        <h2
+          ref={headingRef}
+          tabIndex={-1}
+          className="text-xl font-semibold tracking-tight outline-none"
+        >
+          Paso {draft.step} de 4 · {STEPS[draft.step - 1]}
+        </h2>
+
+        {errorEntries.length > 0 && (
+          <Alert variant="destructive" role="alert">
+            <AlertTitle>Revisa estos campos</AlertTitle>
+            <AlertDescription>
+              <ul className="list-disc pl-4">
+                {errorEntries.map(([k, m]) => (
+                  <li key={k}>
+                    {anchor(k) ? (
+                      <a href={anchor(k)} className="underline">
+                        {m}
+                      </a>
+                    ) : (
+                      m
                     )}
-                  >
-                    {done ? <Check className="size-3.5" aria-hidden /> : n}
-                  </span>
-                  {label}
-                  {done && <span className="sr-only"> (completado, volver)</span>}
-                </button>
-              </li>
-            );
-          })}
-        </ol>
-      </nav>
+                  </li>
+                ))}
+              </ul>
+            </AlertDescription>
+          </Alert>
+        )}
 
-      <h2 ref={headingRef} tabIndex={-1} className="text-lg font-semibold outline-none">
-        {draft.step}. {STEPS[draft.step - 1]}
-      </h2>
+        {draft.step === 1 && <StepWhat draft={draft} errors={errors} onChange={patch} />}
+        {draft.step === 2 && (
+          <StepWhere
+            draft={draft}
+            errors={errors}
+            territories={DEMO_TERRITORIES}
+            territory={territory}
+            duplicates={duplicates}
+            onChange={patch}
+            onPickDuplicate={(id) => {
+              saveDraft(draft);
+              window.location.assign(`/eventos/${id}`);
+            }}
+          />
+        )}
+        {draft.step === 3 && <StepEvidence items={evidence} onItems={(u) => setEvidence(u)} />}
+        {draft.step === 4 && (
+          <StepReview
+            draft={draft}
+            territory={territory}
+            evidence={evidence}
+            errors={errors}
+            onEdit={goTo}
+            onChange={patch}
+          />
+        )}
 
-      {errorEntries.length > 0 && (
-        <Alert variant="destructive" role="alert">
-          <AlertTitle>Revisa estos campos</AlertTitle>
-          <AlertDescription>
-            <ul className="list-disc pl-4">
-              {errorEntries.map(([k, m]) => (
-                <li key={k}>
-                  {anchor(k) ? (
-                    <a href={anchor(k)} className="underline">
-                      {m}
-                    </a>
-                  ) : (
-                    m
-                  )}
-                </li>
-              ))}
-            </ul>
-          </AlertDescription>
-        </Alert>
-      )}
+        {submitError && (
+          <Alert variant="destructive" role="alert">
+            <AlertDescription>{submitError}</AlertDescription>
+          </Alert>
+        )}
+        {draft.step === 4 && !isAuthenticated && (
+          <p className="text-muted-foreground text-sm">
+            Para enviar necesitas iniciar sesión. Guardaremos tu borrador y volverás aquí.
+          </p>
+        )}
 
-      {draft.step === 1 && <StepWhat draft={draft} errors={errors} onChange={patch} />}
-      {draft.step === 2 && (
-        <StepWhere
-          draft={draft}
-          errors={errors}
-          territories={DEMO_TERRITORIES}
-          territory={territory}
-          duplicates={duplicates}
-          onChange={patch}
-          onPickDuplicate={(id) => {
-            saveDraft(draft);
-            window.location.assign(`/eventos/${id}`);
-          }}
-        />
-      )}
-      {draft.step === 3 && <StepEvidence items={evidence} onItems={(u) => setEvidence(u)} />}
-      {draft.step === 4 && (
-        <StepReview
-          draft={draft}
-          territory={territory}
-          evidence={evidence}
-          errors={errors}
-          onEdit={goTo}
-          onChange={patch}
-        />
-      )}
-
-      {submitError && (
-        <Alert variant="destructive" role="alert">
-          <AlertDescription>{submitError}</AlertDescription>
-        </Alert>
-      )}
-      {draft.step === 4 && !isAuthenticated && (
-        <p className="text-muted-foreground text-sm">
-          Para enviar necesitas iniciar sesión. Guardaremos tu borrador y volverás aquí.
-        </p>
-      )}
-
-      <div className="flex flex-wrap items-center justify-between gap-3 border-t pt-4">
-        <div className="flex gap-2">
-          {draft.step > 1 && (
-            <Button variant="outline" onClick={() => goTo((draft.step - 1) as ReportDraft["step"])}>
-              Atrás
+        {/* Phones: the step buttons stay above the bottom nav (3.5rem + safe area). */}
+        <div className="bg-background sticky bottom-[calc(3.5rem+env(safe-area-inset-bottom))] z-30 -mx-4 flex flex-wrap items-center justify-between gap-3 border-t px-4 py-3 md:static md:mx-0 md:px-0 md:pt-4 md:pb-0">
+          <div className="flex gap-2">
+            <Button variant="ghost" className="lg:hidden" onClick={saveAndExit}>
+              Guardar y salir
+            </Button>
+            {draft.step > 1 && (
+              <Button
+                variant="outline"
+                onClick={() => goTo((draft.step - 1) as ReportDraft["step"])}
+              >
+                Atrás
+              </Button>
+            )}
+          </div>
+          {draft.step < 4 ? (
+            <Button onClick={next}>Continuar</Button>
+          ) : (
+            <Button onClick={submit} disabled={submitting}>
+              {submitting
+                ? "Enviando..."
+                : isAuthenticated
+                  ? "Enviar reporte"
+                  : "Iniciar sesión para enviar"}
             </Button>
           )}
-          <Button variant="ghost" onClick={saveAndExit}>
-            Guardar borrador y salir
-          </Button>
         </div>
-        {draft.step < 4 ? (
-          <Button onClick={next}>Continuar</Button>
-        ) : (
-          <Button onClick={submit} disabled={submitting}>
-            {submitting
-              ? "Enviando..."
-              : isAuthenticated
-                ? "Enviar reporte"
-                : "Iniciar sesión para enviar"}
-          </Button>
-        )}
       </div>
-      <p className="text-muted-foreground text-xs" aria-live="polite">
-        {savedNote ?? "El borrador se guarda solo en este dispositivo y no incluye fotos."}
-      </p>
     </div>
   );
 }

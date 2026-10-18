@@ -1,5 +1,6 @@
 import { queryOptions, useQuery } from "@tanstack/react-query";
 import {
+  DEMO_COLLECTION_POINTS,
   DEMO_EVENTS,
   DEMO_NEEDS,
   DEMO_NOTICES,
@@ -8,6 +9,7 @@ import {
   DEMO_TERRITORIES,
 } from "@emergency-map/domain/demo";
 import type {
+  CollectionPoint,
   Need,
   OfficialNotice,
   Organization,
@@ -24,6 +26,7 @@ export interface DashboardSnapshot {
   events: PublicEvent[];
   notices: OfficialNotice[];
   needs: Need[];
+  collectionPoints: CollectionPoint[];
   organizations: Organization[];
   territories: Territory[];
 }
@@ -38,6 +41,7 @@ async function fetchDashboardSnapshot(): Promise<DashboardSnapshot> {
     events: DEMO_EVENTS,
     notices: DEMO_NOTICES,
     needs: DEMO_NEEDS,
+    collectionPoints: DEMO_COLLECTION_POINTS,
     organizations: DEMO_ORGANIZATIONS,
     territories: DEMO_TERRITORIES,
   };
@@ -60,6 +64,8 @@ export interface DashboardView {
   events: PublicEvent[];
   activeNotices: OfficialNotice[];
   openNeeds: Need[];
+  /** Reception points currently operating in scope. Not emergencies, never "safe zones". */
+  collectionPointCount: number;
   /** Distinct sources behind the notices counted, for the coverage note. */
   noticeSourceCount: number;
 }
@@ -88,10 +94,15 @@ export function selectDashboardView(snapshot: DashboardSnapshot, scope: Scope): 
     (n) => n.status === "open" && inScope(n.destinationTerritory.ubigeo),
   );
 
+  const collectionPointCount = snapshot.collectionPoints.filter(
+    (p) => p.status === "active" && inScope(p.territory.ubigeo),
+  ).length;
+
   return {
     events,
     activeNotices,
     openNeeds,
+    collectionPointCount,
     noticeSourceCount: new Set(activeNotices.map((n) => n.sourceId)).size,
   };
 }

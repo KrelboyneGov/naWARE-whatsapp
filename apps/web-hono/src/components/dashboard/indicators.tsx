@@ -6,20 +6,20 @@ interface IndicatorProps {
   to: string;
   value: number;
   label: string;
-  period: string;
+  note: string;
   coverage: string;
 }
 
-function Indicator({ to, value, label, period, coverage }: IndicatorProps) {
+function Indicator({ to, value, label, note, coverage }: IndicatorProps) {
   return (
     <Link
       to={to as "/"}
-      className="block rounded-xl border border-border bg-card p-4 transition-colors hover:border-primary/60"
+      className="grid content-start gap-1 rounded-xl border border-[var(--border-subtle)] bg-card px-[18px] py-4 text-foreground shadow-[var(--shadow-xs)] transition-colors hover:border-[var(--border-strong)]"
     >
-      <p className="tabular font-heading text-3xl font-bold leading-none">{value}</p>
-      <p className="mt-2 text-sm font-medium">{label}</p>
-      <p className="mt-1 text-[13px] text-muted-foreground">{period}</p>
-      <p className="mt-1 text-[13px] text-muted-foreground">{coverage}</p>
+      <span className="text-[13px] text-[var(--text-secondary)]">{label}</span>
+      <span className="tabular font-mono text-[28px] font-medium">{value}</span>
+      <span className="text-xs text-[var(--text-tertiary)]">{note}</span>
+      <span className="text-xs text-[var(--text-secondary)]">{coverage}</span>
     </Link>
   );
 }
@@ -36,21 +36,21 @@ export function Indicators({ view, scopeLabel }: { view: DashboardView; scopeLab
         to="/eventos"
         value={view.events.length}
         label="Eventos publicados"
-        period={`${scopeLabel} · ${DASHBOARD_PERIOD_LABEL}`}
+        note={`${scopeLabel} · ${DASHBOARD_PERIOD_LABEL} · fuentes conectadas`}
         coverage="Solo reportes de demostración; no es un conteo completo del país."
       />
       <Indicator
         to="/mapa"
         value={view.activeNotices.length}
         label="Avisos oficiales vigentes"
-        period={`${scopeLabel} · vigentes ahora`}
+        note={`${scopeLabel} · vigencia declarada por la fuente`}
         coverage={`${sourceText}. Sin aviso no significa sin riesgo.`}
       />
       <Indicator
         to="/ayudar"
         value={view.openNeeds.length}
         label="Necesidades abiertas"
-        period={`${scopeLabel} · abiertas ahora`}
+        note={`${scopeLabel} · según actualización de las organizaciones`}
         coverage="Solo organizaciones de demostración."
       />
     </section>

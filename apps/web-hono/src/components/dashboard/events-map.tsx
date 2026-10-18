@@ -1,5 +1,6 @@
 import { Suspense, lazy, useEffect, useState } from "react";
 import type { PublicEvent, Territory } from "@emergency-map/domain/schemas";
+import { Link } from "@tanstack/react-router";
 import { Skeleton } from "@emergency-map/web-ui";
 
 export interface EventsMapProps {
@@ -22,18 +23,26 @@ export function EventsMap(props: EventsMapProps) {
   useEffect(() => setMounted(true), []);
 
   return (
-    <div
-      className="h-80 overflow-hidden rounded-xl border border-border bg-card lg:h-full lg:min-h-[480px]"
-      role="region"
-      aria-label="Mapa compacto de los eventos de la lista"
-    >
-      {mounted ? (
-        <Suspense fallback={<MapSkeleton />}>
-          <EventsMapClient {...props} />
-        </Suspense>
-      ) : (
-        <MapSkeleton />
-      )}
+    <div className="overflow-hidden rounded-xl border border-[var(--border-subtle)] bg-card">
+      <div
+        className="h-80 bg-[var(--surface-secondary)]"
+        role="region"
+        aria-label="Mapa compacto de los eventos de la lista"
+      >
+        {mounted ? (
+          <Suspense fallback={<MapSkeleton />}>
+            <EventsMapClient {...props} />
+          </Suspense>
+        ) : (
+          <MapSkeleton />
+        )}
+      </div>
+      <div className="flex justify-between gap-2 px-3.5 py-2.5 text-xs text-[var(--text-secondary)]">
+        <span>Mismo subconjunto que la lista · {props.events.length} eventos</span>
+        <Link to={"/mapa" as "/"} className="text-primary">
+          Abrir mapa completo
+        </Link>
+      </div>
     </div>
   );
 }

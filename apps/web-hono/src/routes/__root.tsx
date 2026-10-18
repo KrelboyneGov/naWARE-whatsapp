@@ -1,7 +1,13 @@
 import type { QueryClient } from "@tanstack/react-query";
 
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
-import { HeadContent, Outlet, Scripts, createRootRouteWithContext } from "@tanstack/react-router";
+import {
+  HeadContent,
+  Outlet,
+  Scripts,
+  createRootRouteWithContext,
+  useRouterState,
+} from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 
 import { Toaster } from "@emergency-map/web-ui";
@@ -20,7 +26,7 @@ export interface RouterAppContext {
 }
 
 const FONTS_HREF =
-  "https://fonts.googleapis.com/css2?family=Manrope:wght@600;700;800&family=Public+Sans:wght@400;500;600;700&display=swap";
+  "https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&display=swap";
 
 export const Route = createRootRouteWithContext<RouterAppContext>()({
   head: () => ({
@@ -60,6 +66,9 @@ export const Route = createRootRouteWithContext<RouterAppContext>()({
 function RootDocument() {
   const context = Route.useRouteContext();
   const { isAuthenticated, session } = context;
+  // Full-screen map on phones: no header and no bottom padding, the page sizes itself.
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const immersive = pathname === "/mapa";
 
   return (
     <html lang="es" suppressHydrationWarning>
@@ -73,8 +82,10 @@ function RootDocument() {
             isAuthenticated={isAuthenticated}
             userName={session?.user?.name ?? ""}
             userEmail={session?.user?.email ?? ""}
+            userRole={(session?.user as { role?: string | null } | undefined)?.role ?? null}
+            hideOnMobile={immersive}
           />
-          <main className="pb-20 md:pb-0">
+          <main className={immersive ? "" : "pb-20 md:pb-0"}>
             <Outlet />
           </main>
         </div>

@@ -36,15 +36,17 @@ export function StepWhat({
   return (
     <div className="flex flex-col gap-6">
       <fieldset id="field-category" className="flex flex-col gap-2" aria-describedby="err-category">
-        <legend className="mb-1 text-sm font-medium">¿Qué tipo de situación es?</legend>
-        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+        <legend className="mb-1 text-[13px] font-medium">
+          Categoría <span className="text-destructive">*</span>
+        </legend>
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
           {EVENT_CATEGORIES.map((c) => {
             const Icon = CATEGORY_ICONS[c];
             return (
               <label
                 key={c}
                 className={cn(
-                  "has-[:checked]:border-primary has-[:checked]:bg-primary/5 has-[:focus-visible]:ring-ring/50 flex cursor-pointer items-center gap-2 rounded-md border p-3 text-sm has-[:focus-visible]:ring-2",
+                  "has-[:checked]:border-primary has-[:checked]:bg-primary/5 has-[:focus-visible]:ring-ring/50 grid min-h-11 cursor-pointer content-start gap-2 rounded-xl border p-3 text-sm font-medium has-[:focus-visible]:ring-2",
                 )}
               >
                 <input
@@ -61,11 +63,17 @@ export function StepWhat({
             );
           })}
         </div>
+        <p className="text-muted-foreground text-xs">
+          «Otro» no admite denuncias de delitos ni acusaciones personales. Los incidentes viales son
+          reportes ciudadanos; no hay integración automática de tránsito.
+        </p>
         <FieldError id="err-category" message={errors.category} />
       </fieldset>
 
       <div className="flex flex-col gap-1.5">
-        <Label htmlFor="field-title">Título corto</Label>
+        <Label htmlFor="field-title">
+          Título corto <span className="text-destructive">*</span>
+        </Label>
         <Input
           id="field-title"
           value={draft.title}
@@ -73,7 +81,7 @@ export function StepWhat({
           onChange={(e) => onChange({ title: e.target.value })}
           aria-invalid={!!errors.title}
           aria-describedby="err-title count-title"
-          placeholder="Ej.: Humo en la ladera cerca de la carretera"
+          placeholder="Ej.: Humo visible en la ladera sobre la av. principal"
         />
         <div className="flex justify-between">
           <FieldError id="err-title" message={errors.title} />
@@ -84,7 +92,7 @@ export function StepWhat({
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <Label htmlFor="field-description">Qué observaste (opcional)</Label>
+        <Label htmlFor="field-description">Qué observaste</Label>
         <Textarea
           id="field-description"
           rows={5}
@@ -93,7 +101,7 @@ export function StepWhat({
           onChange={(e) => onChange({ description: e.target.value })}
           aria-invalid={!!errors.description}
           aria-describedby="err-description count-description"
-          placeholder="Describe solo lo que viste o sabes. No es necesario estimar daños ni víctimas."
+          placeholder="Describe solo lo que viste u oíste. No es necesario estimar causa, gravedad ni número de personas."
         />
         <div className="flex justify-between">
           <FieldError id="err-description" message={errors.description} />

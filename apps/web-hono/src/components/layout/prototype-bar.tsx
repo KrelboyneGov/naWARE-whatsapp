@@ -1,12 +1,19 @@
 import { formatDemoClock } from "@/lib/demo-clock";
 
-/** Thin bar that keeps the prototype status and the frozen demo clock always visible. */
+/** Black 32px mono strip that keeps the prototype status and the frozen demo clock always visible. */
 export function PrototypeBar() {
   return (
-    <div className="border-b border-warning/20 bg-warning-bg text-warning">
-      <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-x-4 px-4 py-1 text-[13px] font-medium">
-        <span>Prototipo · datos de demostración</span>
-        <span className="tabular">Reloj de demostración: {formatDemoClock()} (hora de Lima)</span>
+    <div className="bg-[#111] text-white">
+      <div className="flex h-8 items-center gap-3 overflow-hidden px-3 font-mono text-[11px] whitespace-nowrap sm:gap-5 sm:px-5 sm:text-xs">
+        <span className="uppercase tracking-[0.06em]">
+          <span className="sm:hidden">Prototipo</span>
+          <span className="hidden sm:inline">Barra de prototipo</span>
+        </span>
+        <span className="hidden sm:inline">Datos de demostración</span>
+        <span className="tabular ml-auto truncate">
+          <span className="hidden sm:inline">Reloj demo: </span>
+          {formatDemoClock()} (Lima)
+        </span>
       </div>
     </div>
   );
