@@ -1,0 +1,21 @@
+{
+  "expected_workspace_name": "naWARE",
+  "workspace_id": "0148d892-948f-4064-ad64-1a091692b56a",
+  "workspace_url": "https://linear.app/naware",
+  "project_id": "e0c0dbc3-3568-4026-8c38-49bec7b0c4d7",
+  "project_name": "Cerca — Hack the Andes 2026 (track Clima)",
+  "project_url": "https://linear.app/naware/project/cerca-hack-the-andes-2026-track-clima-ea7d50ab7c71",
+  "team_id": "df17ce1e-c780-4b38-ba04-ac6c1ae227c3",
+  "team_key": "NAW",
+  "knowledge_document_id": "3efe7e66-d0da-4839-8e58-1cd0cfc398a3",
+  "knowledge_document_url": "https://linear.app/naware/document/0-base-de-conocimiento-y-gobernanza-para-asistentes-95d0bdc2afd2",
+  "matrix_document_id": "449710b0-6203-469d-a315-d29b813975ec",
+  "matrix_document_url": "https://linear.app/naware/document/7-matriz-de-decisiones-5c43332e1ae1",
+  "skill_document_id": null,
+  "skill_document_url": null,
+  "publication_status": "published_verified",
+  "last_verified_at": "2026-10-17T23:21:51Z",
+  "remote_updated_at": "2026-10-17T23:21:51.309Z",
+  "local_seed_version": "0.2",
+  "note": "Documentos 0 y 7 creados y verificados por lectura el 2026-10-17 con autorización explícita del usuario. La skill se distribuye en el repositorio; el documento 0 explica cómo cargarla. Los documentos 1 a 6 del proyecto no se modificaron."
+}
