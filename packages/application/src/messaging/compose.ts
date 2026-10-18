@@ -1,6 +1,7 @@
 import { OFF_TOPIC_REPLY } from "@emergency-map/domain/schemas";
 import {
   INFORMATIVE_DISCLAIMER,
+  absoluteDayLabel,
   NO_CONFIRMED_INFORMATION,
   foldText,
   replyContractViolations,
@@ -71,7 +72,26 @@ function sentenceCase(text: string): string {
  */
 /** General guidance for "¿qué hago?". Not tied to a district and never says a place is safe. */
 export const PRECAUTIONS_ADVICE =
-  "Si tu zona tiene un aviso naranja o rojo: sigue los comunicados de SENAMHI e INDECI/COEN, evita cruzar ríos, quebradas y zonas de huaico, ten lista una mochila de emergencia (agua, linterna, radio, documentos) y acuerda con tu familia un punto de reunión.";
+  "En los avisos de SENAMHI, naranja significa que se espera un fenómeno de intensidad alta y conviene prepararse; rojo, de intensidad extrema. Qué hacer: sigue los comunicados de SENAMHI e INDECI/COEN. Si es por lluvias, evita cruzar ríos, quebradas y zonas de huaico. Si es por viento, asegura techos y objetos sueltos y aléjate de estructuras inestables. Si es por calor o frío, protégete del sol o abrígate y cuida a niños y adultos mayores. Ten lista una mochila de emergencia (agua, linterna, radio, documentos) y acuerda con tu familia un punto de reunión.";
+
+/**
+ * WhatsApp does not render Markdown links, headings or double-asterisk bold. Links become the
+ * bare URL (or "label: URL"), **bold** becomes *bold*, headings lose their hashes.
+ */
+export function formatForWhatsApp(text: string): string {
+  return text
+    .replace(/\[([^\]]+)\]\((https?:\/\/[^)\s]+)\)/g, (_match, label: string, url: string) =>
+      /^(aqu[ií]|este enlace|el enlace|enlace|enlace aqu[ií]|m[aá]s detalles( aqu[ií])?|ver|link)$/i.test(
+        label.trim(),
+      )
+        ? url
+        : `${label}: ${url}`,
+    )
+    .replace(/\*\*([^*]+)\*\*/g, "*$1*")
+    .replace(/^#{1,6}\s+/gm, "")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+}
 
 export function wantsAdvice(text: string): boolean {
   return /que hago|que hacer|que debo|precauc|recomend|prepar|como me cuido/.test(foldText(text));
@@ -129,8 +149,15 @@ export function completeReplyContract(draft: string, facts: CitizenFacts): strin
     text = `${NO_CONFIRMED_INFORMATION}. ${text}`;
   }
   if ((violations.has("missing_source") || violations.has("missing_time")) && facts.source) {
+    // Say what each source gave, so forecast numbers are never attributed to SENAMHI.
+    const what =
+      facts.source === "SENAMHI"
+        ? "Avisos"
+        : facts.source === "Open-Meteo"
+          ? "Pronóstico"
+          : "Fuente";
     additions.push(
-      `Fuente: ${facts.source}${facts.updatedAtLabel ? `, datos de las ${facts.updatedAtLabel}` : ""}.`,
+      `${what}: ${facts.source}${facts.updatedAtLabel ? `, consultado a las ${facts.updatedAtLabel} (hora de Lima)` : ""}.`,
     );
   }
   if (violations.has("missing_limit")) additions.push("El pronóstico puede cambiar.");
@@ -192,7 +219,7 @@ export function factsFromReadings(input: {
             .slice(0, 2)
             .map(
               (notice) =>
-                `SENAMHI tiene vigente el aviso N° ${notice.number} «${sentenceCase(notice.title)}», nivel ${notice.level} según SENAMHI, del ${notice.validFrom} al ${notice.validTo}. Revisa si incluye tu zona: ${notice.url}`,
+                `SENAMHI tiene vigente el aviso N° ${notice.number} «${sentenceCase(notice.title)}», nivel ${notice.level} según SENAMHI, vigente del ${absoluteDayLabel(notice.validFrom)} al ${absoluteDayLabel(notice.validTo)}. Revisa si incluye tu zona: ${notice.url}`,
             )
             .join("\n") + ` (SENAMHI, consultado a las ${liveTime ?? "--:--"}).`
         : `En los avisos vigentes de SENAMHI (consultados a las ${liveTime ?? "--:--"}) no encontré uno vigente para esa fecha que pueda incluir la zona de ${zone}. Eso no descarta lluvias.`;

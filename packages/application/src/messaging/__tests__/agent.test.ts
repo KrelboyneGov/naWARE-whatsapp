@@ -230,3 +230,28 @@ describe("runAgent with a tool-calling model", () => {
     expect(turn.reply).toContain("Open-Meteo");
   });
 });
+
+describe("WhatsApp formatting", () => {
+  it("turns Markdown links and bold into WhatsApp text", async () => {
+    const { formatForWhatsApp } = await import("../compose");
+    expect(
+      formatForWhatsApp(
+        "Revisa [aquí](https://senamhi.gob.pe/a) y **N° 423**.\n\n\n## Nota\n[Aviso 423](https://senamhi.gob.pe/b)",
+      ),
+    ).toBe(
+      "Revisa https://senamhi.gob.pe/a y *N° 423*.\n\nNota\nAviso 423: https://senamhi.gob.pe/b",
+    );
+  });
+});
+
+describe("reply contract closing", () => {
+  it("accepts 'la decisión de viajar es tuya' so the closing is not added twice", async () => {
+    const { replyContractViolations } = await import("@emergency-map/domain/rules");
+    const violations = replyContractViolations({
+      kind: "risk",
+      source: "SENAMHI",
+      text: "Aviso de SENAMHI a las 09:48. Puede cambiar. Consulta INDECI. Esto es informativo y no sustituye a INDECI ni a SENAMHI. La decisión de viajar es tuya.",
+    });
+    expect(violations).not.toContain("missing_user_decision");
+  });
+});

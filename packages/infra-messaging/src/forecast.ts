@@ -20,6 +20,7 @@ export function createOpenMeteoForecast(fetchImpl: typeof fetch = fetch): IForec
         let latitude = query.latitude;
         let longitude = query.longitude;
         let region: string | null = null;
+        let elevationM: number | null = null;
         if (latitude === null || longitude === null) {
           const geoUrl = new URL("https://geocoding-api.open-meteo.com/v1/search");
           geoUrl.searchParams.set("name", query.placeName);
@@ -35,7 +36,12 @@ export function createOpenMeteoForecast(fetchImpl: typeof fetch = fetch): IForec
             );
           }
           const geo = (await geoResponse.json()) as {
-            results?: { latitude: number; longitude: number; admin1?: string }[];
+            results?: {
+              latitude: number;
+              longitude: number;
+              admin1?: string;
+              elevation?: number;
+            }[];
           };
           const hit = geo.results?.[0];
           if (!hit) {
@@ -44,6 +50,7 @@ export function createOpenMeteoForecast(fetchImpl: typeof fetch = fetch): IForec
           latitude = hit.latitude;
           longitude = hit.longitude;
           region = hit.admin1 ?? null;
+          elevationM = hit.elevation ?? null;
         }
 
         const forecastUrl = new URL("https://api.open-meteo.com/v1/forecast");
@@ -60,6 +67,7 @@ export function createOpenMeteoForecast(fetchImpl: typeof fetch = fetch): IForec
           return unavailable(fetchedAt, query.date, "Open-Meteo no respondió el pronóstico.");
         }
         const payload = (await response.json()) as {
+          elevation?: number;
           daily?: {
             time?: string[];
             precipitation_probability_max?: (number | null)[];
@@ -97,6 +105,7 @@ export function createOpenMeteoForecast(fetchImpl: typeof fetch = fetch): IForec
           temperatureMaxC: max,
           temperatureMinC: min,
           region,
+          elevationM: elevationM ?? payload.elevation ?? null,
           reason: null,
         };
       } catch {

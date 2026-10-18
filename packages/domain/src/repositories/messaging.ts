@@ -109,6 +109,8 @@ export interface ForecastSnapshot {
   temperatureMinC: number | null;
   /** Department (region) of the geocoded place, e.g. "Arequipa". */
   region: string | null;
+  /** Altitude of the place in metres, when known. Separates sierra from coast inside a department. */
+  elevationM?: number | null;
   /** Why `available` is false. */
   reason: string | null;
 }

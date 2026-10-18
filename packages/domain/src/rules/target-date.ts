@@ -97,6 +97,13 @@ export function resolveTargetDate(text: string, now: Date): TargetDate {
   return toTarget(today, today);
 }
 
+/** "2026-10-19" → "lunes 19 de octubre". No "hoy"/"mañana": safe to quote on any day. */
+export function absoluteDayLabel(iso: string): string {
+  const day = new Date(`${iso}T00:00:00Z`);
+  if (Number.isNaN(day.getTime())) return iso;
+  return `${WEEKDAY_LABELS[day.getUTCDay()] ?? ""} ${day.getUTCDate()} de ${MONTHS[day.getUTCMonth()] ?? ""}`;
+}
+
 /** True when the text names a day ("hoy", "mañana", a weekday, a date), so it is not a follow-up. */
 export function hasDateExpression(text: string): boolean {
   const folded = foldText(text);

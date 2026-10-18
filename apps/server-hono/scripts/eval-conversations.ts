@@ -198,6 +198,22 @@ async function main(): Promise<void> {
       if (kind && turn.facts.kind !== kind) checks.push(`tipo_esperado:${kind}`);
       const must = scenario.contains?.[index];
       if (must && !turn.reply.includes(must)) checks.push(`falta_texto:${must}`);
+      if (/\]\(https?:|\*\*/.test(turn.reply)) checks.push("formato_markdown");
+      const utcHour = new Date().getUTCHours();
+      const limaHour = Number(
+        new Intl.DateTimeFormat("en-US", {
+          timeZone: "America/Lima",
+          hour: "numeric",
+          hour12: false,
+        }).format(new Date()),
+      );
+      const hours = [...turn.reply.matchAll(/\b(\d{1,2}):\d{2}\b/g)].map((match) =>
+        Number(match[1]),
+      );
+      if (utcHour !== limaHour && hours.includes(utcHour)) checks.push("hora_en_utc");
+      if ((turn.reply.match(/decisi[oó]n[^.]{0,30}es tuya/gi) ?? []).length > 1) {
+        checks.push("cierre_duplicado");
+      }
       const forbidden = replyViolations(turn.reply);
       const contract =
         turn.facts.kind === "off_topic"

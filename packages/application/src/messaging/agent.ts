@@ -6,6 +6,7 @@ import type {
 } from "@emergency-map/domain/repositories";
 import { AGENT_SYSTEM_PROMPT, OFF_TOPIC_REPLY } from "@emergency-map/domain/schemas";
 import {
+  absoluteDayLabel,
   foldText,
   noticeMayCoverDepartment,
   hasDateExpression,
@@ -18,6 +19,7 @@ import {
   PRECAUTIONS_ADVICE,
   composeCitizenReply,
   factsFromReadings,
+  formatForWhatsApp,
   guardReply,
   wantsAdvice,
 } from "./compose";
@@ -266,14 +268,22 @@ const TOOL_ORDER = [
 interface LiveNoticesToolResult {
   available: boolean;
   consultado: string | null;
+  /** HH:MM in Lima, ready to quote. */
+  consultado_hora_lima?: string | null;
   region: string | null;
   motivo?: string;
+  /** Current notices that are not for this zone or date: counted, never listed, so they are not quoted. */
+  otros_avisos_vigentes?: number;
+  nota?: string;
+  /** Only the notices that may include the zone and are valid on the asked day. */
   avisos: {
     numero: string;
     titulo: string;
     nivel: "amarillo" | "naranja" | "rojo";
     vigente_desde: string;
     vigente_hasta: string;
+    /** Validity in words relative to today, e.g. "del sábado 17 al mañana lunes 19 de octubre". */
+    vigencia_texto?: string;
     enlace: string;
     puede_incluir_la_zona: boolean;
     vigente_en_la_fecha: boolean;
@@ -307,7 +317,7 @@ export async function callAgentTool(
   args: Record<string, unknown>,
   home: { name: string; ubigeo: string | null },
   target: TargetDate,
-  context: { region?: string | null } = {},
+  context: { region?: string | null; elevationM?: number | null } = {},
 ): Promise<unknown> {
   const now = deps.clock.now();
   if (name === "resolver_lugar") {
@@ -315,12 +325,18 @@ export async function callAgentTool(
     return resolvePlace(deps, query, home);
   }
   if (name === "pronostico") {
-    return deps.forecast.forecast({
+    const snapshot = await deps.forecast.forecast({
       placeName: typeof args.place === "string" ? args.place : home.name,
       latitude: typeof args.latitude === "number" ? args.latitude : null,
       longitude: typeof args.longitude === "number" ? args.longitude : null,
       date: isoDateArgument(args.date, target, now),
     });
+    return {
+      ...snapshot,
+      consultado_hora_lima: snapshot.fetchedAt
+        ? formatTimeLima(new Date(snapshot.fetchedAt))
+        : null,
+    };
   }
   if (name === "avisos_senamhi_vigentes") {
     const region =
@@ -346,20 +362,30 @@ export async function callAgentTool(
         avisos: [],
       };
     }
+    const all = feed.notices.map((notice) => ({
+      numero: notice.number,
+      titulo: notice.title,
+      nivel: notice.level,
+      vigente_desde: notice.validFrom,
+      vigente_hasta: notice.validTo,
+      vigencia_texto: `del ${absoluteDayLabel(notice.validFrom)} al ${absoluteDayLabel(notice.validTo)}`,
+      enlace: notice.url,
+      puede_incluir_la_zona: noticeMayCoverDepartment(notice.title, region, context.elevationM),
+      vigente_en_la_fecha: notice.validFrom <= target.iso && target.iso <= notice.validTo,
+    }));
+    const applicable = all.filter(
+      (notice) => notice.puede_incluir_la_zona && notice.vigente_en_la_fecha,
+    );
     const result: LiveNoticesToolResult = {
       available: true,
       consultado: feed.fetchedAt,
+      consultado_hora_lima: formatTimeLima(new Date(feed.fetchedAt)),
       region,
-      avisos: feed.notices.map((notice) => ({
-        numero: notice.number,
-        titulo: notice.title,
-        nivel: notice.level,
-        vigente_desde: notice.validFrom,
-        vigente_hasta: notice.validTo,
-        enlace: notice.url,
-        puede_incluir_la_zona: noticeMayCoverDepartment(notice.title, region),
-        vigente_en_la_fecha: notice.validFrom <= target.iso && target.iso <= notice.validTo,
-      })),
+      otros_avisos_vigentes: all.length - applicable.length,
+      nota: region
+        ? `Solo se listan los avisos que pueden incluir ${region} el ${target.iso}. Los demás no aplican a esta zona o fecha: no los menciones.`
+        : "No se conoce la región del lugar: no afirmes que algún aviso la incluye.",
+      avisos: applicable,
     };
     return result;
   }
@@ -483,11 +509,17 @@ async function runToolBatch(
   const ordered = [...calls].sort(
     (left, right) => TOOL_ORDER.indexOf(left.name) - TOOL_ORDER.indexOf(right.name),
   );
-  let region = bagFromMessages(messages).forecast?.region ?? null;
+  const previous = bagFromMessages(messages).forecast;
+  let region = previous?.region ?? null;
+  let elevationM = previous?.elevationM ?? null;
   for (const call of ordered) {
-    const result = await callAgentTool(deps, call.name, call.arguments, home, target, { region });
+    const result = await callAgentTool(deps, call.name, call.arguments, home, target, {
+      region,
+      elevationM,
+    });
     if (call.name === "pronostico") {
       region = (result as ForecastSnapshot).region ?? region;
+      elevationM = (result as ForecastSnapshot).elevationM ?? elevationM;
     }
     toolNames.push(call.name);
     messages.push({
@@ -518,6 +550,21 @@ function offTopicFacts(
     ubigeo: home.ubigeo,
     noticeId: null,
   };
+}
+
+/** For "¿qué hago si…?": treat it as hypothetical and hand the model the general precautions. */
+function adviceHint(text: string): string {
+  if (!wantsAdvice(text)) return "";
+  return ` La persona pregunta qué hacer: si la pregunta es hipotética («si mi distrito está en…»), no afirmes que su distrito está en ese nivel ni le asocies avisos. Explica qué significa el nivel y da las precauciones del fenómeno que corresponda; no hace falta dar el pronóstico de hoy salvo que lo pida. Base: ${PRECAUTIONS_ADVICE}`;
+}
+
+/** WhatsApp format, plus the precautions when the person asked what to do and the reply missed them. */
+function finishReply(reply: string, facts: CitizenFacts): string {
+  const formatted = formatForWhatsApp(reply);
+  if (facts.advice && !foldText(formatted).includes("mochila")) {
+    return `${formatted}\n\n${facts.advice}`;
+  }
+  return formatted;
 }
 
 function contextLine(now: Date, home: { name: string }): string {
@@ -569,7 +616,7 @@ export async function runAgent(
     ...history.map((turn) => ({ role: turn.role, content: turn.content })),
     {
       role: "user",
-      content: `${input.text}\n\n[Contexto automático: fecha consultada ${target.label} (${target.iso}); lugar consultado: ${suggestedPlace}.]`,
+      content: `${input.text}\n\n[Contexto automático: fecha consultada ${target.label} (${target.iso}); lugar consultado: ${suggestedPlace}.${adviceHint(input.text)}]`,
     },
   ];
   const toolNames: string[] = [];
@@ -606,14 +653,14 @@ export async function runAgent(
           ...factsFromBag(bagFromMessages(messages), home.name, target),
           advice: wantsAdvice(input.text) ? PRECAUTIONS_ADVICE : null,
         };
-    return { reply: guardReply(text, facts), toolNames, facts };
+    return { reply: finishReply(guardReply(text, facts), facts), toolNames, facts };
   }
 
   const facts = {
     ...factsFromBag(bagFromMessages(messages), home.name, target),
     advice: wantsAdvice(input.text) ? PRECAUTIONS_ADVICE : null,
   };
-  return { reply: composeCitizenReply(facts), toolNames, facts };
+  return { reply: finishReply(composeCitizenReply(facts), facts), toolNames, facts };
 }
 
 /**

@@ -75,12 +75,30 @@ export function noticeZones(title: string): MacroZone[] {
   return [...zones];
 }
 
-/** True when the notice names a zone of the department. Unknown department: false. */
+/**
+ * Zones of a place: the department's zones, narrowed by altitude when it is known. Above about
+ * 2000 m a place is in the sierra (Huaraz, Yura, Cusco); below 1000 m it is not (Lima, Piura).
+ */
+export function placeZones(
+  department: string | null | undefined,
+  elevationM?: number | null,
+): MacroZone[] {
+  const zones = departmentZones(department);
+  if (elevationM == null) return zones;
+  const sierra = zones.filter((zone) => zone.startsWith("sierra"));
+  const lowland = zones.filter((zone) => !zone.startsWith("sierra"));
+  if (elevationM >= 2000 && sierra.length > 0) return sierra;
+  if (elevationM < 1000 && lowland.length > 0) return lowland;
+  return zones;
+}
+
+/** True when the notice names a zone of the place. Unknown department: false. */
 export function noticeMayCoverDepartment(
   title: string,
   department: string | null | undefined,
+  elevationM?: number | null,
 ): boolean {
-  const zones = departmentZones(department);
+  const zones = placeZones(department, elevationM);
   if (zones.length === 0) return false;
   const named = noticeZones(title);
   return named.some((zone) => zones.includes(zone));

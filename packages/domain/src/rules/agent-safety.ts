@@ -53,7 +53,8 @@ export function replyContractViolations(input: ReplyContractInput): string[] {
 
   if (input.kind === "risk") {
     if (!folded.includes(foldText(INFORMATIVE_DISCLAIMER))) violations.push("missing_disclaimer");
-    if (!folded.includes("la decision es tuya") && !folded.includes("tu decides")) {
+    // "La decisión es tuya", "la decisión de viajar es tuya", "tú decides".
+    if (!/decision[^.]{0,30}es tuya|\btu decides\b|\bdecides tu\b/.test(folded)) {
       violations.push("missing_user_decision");
     }
   }
