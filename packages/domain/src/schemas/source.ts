@@ -26,6 +26,7 @@ export const dataSourceSchema = z.object({
 });
 export type DataSource = z.infer<typeof dataSourceSchema>;
 
+/** One execution of one ingestor (the ticket calls it IngestRun). */
 export const importRunSchema = z.object({
   id: z.string(),
   sourceId: z.string(),
