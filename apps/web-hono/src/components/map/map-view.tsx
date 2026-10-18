@@ -147,11 +147,12 @@ function EventPin({
           type="button"
           aria-label={`${CATEGORY_LABELS[event.category]}: ${event.title} (${PRECISION_LABELS[event.place.precision]})`}
           className={cn(
-            "flex size-8 items-center justify-center rounded-full border-2 shadow-md transition-transform",
-            approximate
-              ? "border-dashed border-primary bg-background text-primary"
-              : "border-background bg-primary text-primary-foreground",
-            selected && "scale-125 ring-4 ring-ring/60",
+            "flex size-7 items-center justify-center rounded-full border-[1.5px] shadow-md transition-transform",
+            // Solid outline = indicated point; dashed = approximate. The blue ring is selection,
+            // never severity.
+            "bg-background text-foreground border-foreground",
+            approximate ? "border-dashed" : "border-solid",
+            selected && "scale-125 ring-4 ring-primary/60",
           )}
         >
           <Icon className="size-4" aria-hidden />
@@ -245,7 +246,7 @@ export default function MapView(props: MapViewProps) {
                 <div
                   role="img"
                   aria-label={`Punto de acopio: ${p.name}`}
-                  className="flex size-7 items-center justify-center rounded-md border-2 border-background bg-emerald-600 text-white shadow-md"
+                  className="flex size-7 items-center justify-center rounded-lg border-[1.5px] border-help bg-help-quiet text-help shadow-md"
                 >
                   <HandHelping className="size-4" aria-hidden />
                 </div>
@@ -354,20 +355,24 @@ export default function MapView(props: MapViewProps) {
           <summary className="cursor-pointer px-2.5 py-1.5 font-medium">Leyenda</summary>
           <ul className="flex flex-col gap-1.5 border-t px-2.5 py-2">
             <li className="flex items-center gap-2">
-              <span className="bg-primary inline-block size-4 rounded-full border-2 border-background" />
-              Punto indicado
+              <span className="bg-background border-foreground inline-block size-4 rounded-full border-[1.5px]" />
+              Evento con punto indicado (icono por categoría)
             </li>
             <li className="flex items-center gap-2">
-              <span className="border-primary inline-block size-4 rounded-full border-2 border-dashed" />
-              Punto aproximado (no es el perímetro)
+              <span className="border-foreground inline-block size-4 rounded-full border-[1.5px] border-dashed" />
+              Ubicación aproximada (no es el perímetro)
             </li>
             <li className="flex items-center gap-2">
               <span className="inline-block size-4 rounded border-2 border-orange-600 bg-orange-600/15" />
               Aviso oficial (borde continuo = vigente, punteado = vencido)
             </li>
             <li className="flex items-center gap-2">
-              <span className="inline-block size-4 rounded bg-emerald-600" />
-              Punto de acopio (no es una emergencia)
+              <span className="inline-block size-4 rounded border-[1.5px] border-help bg-help-quiet" />
+              Punto de ayuda (no es una emergencia ni indica zona segura)
+            </li>
+            <li className="flex items-center gap-2">
+              <span className="inline-block size-4 rounded-full ring-2 ring-primary" />
+              Anillo azul: selección, no severidad
             </li>
           </ul>
         </details>

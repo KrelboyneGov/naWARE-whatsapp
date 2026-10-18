@@ -8,9 +8,11 @@ import {
   EVENT_CATEGORIES,
   ORIGINS,
   REVIEW_STATUSES,
+  SITUATION_STATUSES,
   type EventCategory,
   type Origin,
   type ReviewStatus,
+  type SituationStatus,
 } from "@emergency-map/domain/constants";
 import type { Bounds, OfficialNotice, PublicEvent, Territory } from "@emergency-map/domain/schemas";
 import type { EventFilters } from "@emergency-map/domain/schemas";
@@ -37,6 +39,8 @@ export interface MapEventFilters {
   categories?: EventCategory[];
   origins?: Origin[];
   reviewStatuses?: ReviewStatus[];
+  /** Temporal state (recent update, no recent information, closure reported). */
+  situations?: SituationStatus[];
   period?: Period;
   withNeeds?: boolean;
   /** Territory scope by ubigeo prefix (2 = department, 4 = province, 6 = district). */
@@ -59,6 +63,7 @@ export const mapSearchSchema = z.object({
   cat: z.array(z.enum(EVENT_CATEGORIES)).optional().catch(undefined),
   org: z.array(z.enum(ORIGINS)).optional().catch(undefined),
   rev: z.array(z.enum(REVIEW_STATUSES)).optional().catch(undefined),
+  sit: z.array(z.enum(SITUATION_STATUSES)).optional().catch(undefined),
   per: z.enum(PERIODS).optional().catch(undefined),
   needs: z.literal(true).optional().catch(undefined),
   /** Layers switched OFF. */
@@ -93,6 +98,7 @@ export function searchToFilters(search: MapSearch): MapEventFilters {
     categories: search.cat,
     origins: search.org,
     reviewStatuses: search.rev,
+    situations: search.sit,
     period: search.per,
     withNeeds: search.needs,
     ubigeo: search.ter,
@@ -127,6 +133,7 @@ export function hasActiveFilters(f: MapEventFilters): boolean {
     f.categories?.length ||
     f.origins?.length ||
     f.reviewStatuses?.length ||
+    f.situations?.length ||
     f.period ||
     f.withNeeds,
   );
@@ -144,6 +151,9 @@ export function applyEventFilters(
     if (filters.categories?.length && !filters.categories.includes(e.category)) return false;
     if (filters.origins?.length && !filters.origins.includes(e.origin)) return false;
     if (filters.reviewStatuses?.length && !filters.reviewStatuses.includes(e.reviewStatus)) {
+      return false;
+    }
+    if (filters.situations?.length && !filters.situations.includes(e.situationStatus)) {
       return false;
     }
     if (filters.withNeeds && !e.hasOpenNeeds) return false;
@@ -169,7 +179,9 @@ export function applyNoticeFilters(
   return notices.filter((n) => {
     if (filters.categories?.length && !filters.categories.includes(n.category)) return false;
     if (filters.origins?.length && !filters.origins.includes("official")) return false;
-    if (filters.reviewStatuses?.length || filters.withNeeds) return false;
+    if (filters.reviewStatuses?.length || filters.situations?.length || filters.withNeeds) {
+      return false;
+    }
     if (filters.ubigeo && !filters.bounds) {
       if (!n.territories.some((t) => t.ubigeo.startsWith(filters.ubigeo!))) return false;
     }

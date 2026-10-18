@@ -20,7 +20,7 @@ export interface RouterAppContext {
 }
 
 const FONTS_HREF =
-  "https://fonts.googleapis.com/css2?family=Manrope:wght@600;700;800&family=Public+Sans:wght@400;500;600;700&display=swap";
+  "https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&display=swap";
 
 export const Route = createRootRouteWithContext<RouterAppContext>()({
   head: () => ({
@@ -73,6 +73,7 @@ function RootDocument() {
             isAuthenticated={isAuthenticated}
             userName={session?.user?.name ?? ""}
             userEmail={session?.user?.email ?? ""}
+            userRole={(session?.user as { role?: string | null } | undefined)?.role ?? null}
           />
           <main className="pb-20 md:pb-0">
             <Outlet />

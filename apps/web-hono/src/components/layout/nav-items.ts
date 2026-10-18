@@ -8,6 +8,8 @@ import {
   type LucideIcon,
 } from "lucide-react";
 
+import type { UserRole } from "@emergency-map/domain/constants";
+
 export interface NavItem {
   to: string;
   label: string;
@@ -42,3 +44,30 @@ export const ACCOUNT_ITEM_SIGNED_IN: NavItem = {
   label: "Cuenta",
   icon: CircleUserRound,
 };
+
+/**
+ * Routes reachable outside the primary nav, grouped for the account menu.
+ * Public secondary pages are listed for signed-in and signed-out users alike;
+ * internal pages only for reviewer/admin roles.
+ */
+export const ACCOUNT_LINKS: Array<{ to: string; label: string }> = [
+  { to: "/mi-localidad", label: "Mi localidad" },
+  { to: "/cerca", label: "Cerca de mí" },
+  { to: "/fuentes", label: "Fuentes" },
+];
+
+export const SIGNED_IN_LINKS: Array<{ to: string; label: string }> = [
+  { to: "/mis-reportes", label: "Mis reportes" },
+  { to: "/organizacion", label: "Mi organización" },
+];
+
+/** Internal tooling (/revision, /revision/$id, /difusion). Shown only for these roles. */
+export const INTERNAL_ROLES: readonly UserRole[] = ["moderator", "admin"];
+export const INTERNAL_LINKS: Array<{ to: string; label: string }> = [
+  { to: "/revision", label: "Revisión" },
+  { to: "/difusion", label: "Difusión" },
+];
+
+export function isInternalRole(role: string | null | undefined): boolean {
+  return !!role && (INTERNAL_ROLES as readonly string[]).includes(role);
+}

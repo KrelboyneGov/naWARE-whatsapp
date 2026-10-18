@@ -1,10 +1,11 @@
 import { Suspense, lazy, useCallback, useEffect, useMemo, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { List, Map as MapIcon, Plus } from "lucide-react";
+import { List, Map as MapIcon, MapPinOff, Plus } from "lucide-react";
 import { Button, Skeleton, buttonVariants, cn } from "@emergency-map/web-ui";
 import type { Bounds, Territory } from "@emergency-map/domain/schemas";
 import { useMapData } from "@/components/map/use-map-data";
 import { MapPanel } from "@/components/map/map-panel";
+import { EventDetailPanel } from "@/components/map/event-detail-panel";
 import type { MapFocus } from "@/components/map/map-view";
 import {
   LAYER_LABELS,
@@ -74,6 +75,7 @@ function MapaPage() {
     search.ter ? t.ubigeo.startsWith(search.ter) : false,
   );
   const boundsMode = !!search.bbox;
+  const selectedEvent = shownEvents.find((e) => e.id === search.sel);
 
   const pickTerritory = (t: Territory) => {
     patch({ ter: t.ubigeo, bbox: undefined, sel: undefined });
@@ -87,15 +89,30 @@ function MapaPage() {
 
   const showMap = !tilesFailed;
   const mapNode = !showMap ? (
-    <div className="flex h-full flex-col items-center justify-center gap-3 p-6 text-center">
-      <p className="font-medium">No pudimos cargar el mapa</p>
-      <p className="text-muted-foreground max-w-xs text-sm">
-        Los filtros y las fichas siguen disponibles en la lista.
-      </p>
-      <Button onClick={() => patch({ view: "list" })}>Ver lista</Button>
-      <Button variant="ghost" size="sm" onClick={() => setTilesFailed(false)}>
-        Reintentar
-      </Button>
+    <div className="bg-muted flex h-full items-center justify-center p-4">
+      <div
+        role="alert"
+        className="bg-background grid max-w-[360px] justify-items-center gap-3 rounded-2xl border p-7 text-center"
+      >
+        <MapPinOff className="size-6" aria-hidden />
+        <strong className="text-[17px]">No pudimos cargar el mapa</strong>
+        <p className="text-muted-foreground text-sm">
+          El proveedor de teselas no respondió. Los filtros y las fichas siguen operativos en la
+          lista.
+        </p>
+        <div className="flex gap-2">
+          <Button onClick={() => patch({ view: "list" })}>Ver lista</Button>
+          <Button
+            variant="outline"
+            onClick={() => {
+              setTilesFailed(false);
+              setResetKey((k) => k + 1);
+            }}
+          >
+            Reintentar
+          </Button>
+        </div>
+      </div>
     </div>
   ) : mounted ? (
     <Suspense fallback={<MapSkeleton />}>
@@ -151,6 +168,7 @@ function MapaPage() {
           cat: undefined,
           org: undefined,
           rev: undefined,
+          sit: undefined,
           per: undefined,
           needs: undefined,
         })
@@ -211,6 +229,14 @@ function MapaPage() {
           <Plus aria-hidden /> Reportar
         </Link>
       </section>
+
+      {selectedEvent && (
+        <EventDetailPanel
+          event={selectedEvent}
+          now={now}
+          onClose={() => patch({ sel: undefined })}
+        />
+      )}
     </div>
   );
 }

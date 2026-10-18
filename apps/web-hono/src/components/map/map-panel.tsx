@@ -5,9 +5,11 @@ import {
   EVENT_CATEGORIES,
   ORIGINS,
   REVIEW_STATUSES,
+  SITUATION_STATUSES,
   type EventCategory,
   type Origin,
   type ReviewStatus,
+  type SituationStatus,
 } from "@emergency-map/domain/constants";
 import type { PublicEvent, Territory } from "@emergency-map/domain/schemas";
 import {
@@ -16,6 +18,7 @@ import {
   ORIGIN_LABELS,
   PRECISION_LABELS,
   REVIEW_LABELS,
+  SITUATION_LABELS,
   formatDateTime,
   formatRelative,
 } from "@/lib/labels";
@@ -31,6 +34,7 @@ import {
 } from "@/lib/map-filters";
 import { CATEGORY_ICONS } from "./category-icons";
 import { MapOriginBadge, MapReviewBadge } from "./badges";
+import { DemoBadge } from "../event/demo-badge";
 
 export interface MapPanelProps {
   now: Date;
@@ -133,6 +137,13 @@ export function MapPanel(props: MapPanelProps) {
       key: `r-${r}`,
       label: REVIEW_LABELS[r],
       remove: () => onPatch({ rev: toggle(filters.reviewStatuses, r) }),
+    }),
+  );
+  filters.situations?.forEach((st) =>
+    chips.push({
+      key: `s-${st}`,
+      label: SITUATION_LABELS[st],
+      remove: () => onPatch({ sit: toggle(filters.situations, st) }),
     }),
   );
   if (filters.period)
@@ -286,6 +297,17 @@ export function MapPanel(props: MapPanelProps) {
                 </Chip>
               ))}
             </FilterGroup>
+            <FilterGroup title="Estado temporal">
+              {SITUATION_STATUSES.map((st: SituationStatus) => (
+                <Chip
+                  key={st}
+                  pressed={!!filters.situations?.includes(st)}
+                  onClick={() => onPatch({ sit: toggle(filters.situations, st) })}
+                >
+                  {SITUATION_LABELS[st]}
+                </Chip>
+              ))}
+            </FilterGroup>
             <FilterGroup title="Periodo (fecha del evento)">
               {PERIODS.map((p: Period) => (
                 <Chip
@@ -333,7 +355,9 @@ export function MapPanel(props: MapPanelProps) {
         <p className="mb-2 text-sm font-medium" aria-live="polite">
           {props.loading
             ? "Cargando..."
-            : `${events.length} ${events.length === 1 ? "evento" : "eventos"} ciudadanos`}
+            : `${events.length} ${events.length === 1 ? "evento" : "eventos"} ciudadanos${
+                filters.period ? ` · ${PERIOD_LABELS[filters.period].toLowerCase()}` : ""
+              }`}
         </p>
         <p className="text-muted-foreground mb-3 text-xs">
           {props.noticeCount} {props.noticeCount === 1 ? "aviso oficial" : "avisos oficiales"} en el
@@ -384,6 +408,7 @@ export function MapPanel(props: MapPanelProps) {
                       <span className="flex flex-wrap items-center gap-1">
                         <MapOriginBadge origin={e.origin} />
                         <MapReviewBadge status={e.reviewStatus} />
+                        {e.isDemo && <DemoBadge />}
                         {districtOnly && (
                           <Badge variant="outline">
                             <MapPin aria-hidden /> Solo distrito
@@ -403,7 +428,7 @@ export function MapPanel(props: MapPanelProps) {
                     </span>
                   </button>
                   {selected && (
-                    <div className="flex flex-col gap-1 border-t px-2.5 py-2 text-xs">
+                    <div className="flex flex-col gap-1 border-t px-2.5 py-2 text-xs lg:hidden">
                       <p className="text-muted-foreground">
                         {districtOnly
                           ? "Solo se conoce el distrito: no hay punto en el mapa."
@@ -423,6 +448,10 @@ export function MapPanel(props: MapPanelProps) {
             );
           })}
         </ul>
+        <p className="text-muted-foreground mt-3 text-xs leading-relaxed">
+          Consultado con el reloj de demostración. Los puntos de ayuda no se incluyen en el conteo
+          de eventos. «No encontramos reportes» no significa «no hay peligro».
+        </p>
       </div>
     </div>
   );

@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router";
-import { buttonVariants } from "@emergency-map/web-ui";
+import { Plus } from "lucide-react";
+import { Badge, buttonVariants } from "@emergency-map/web-ui";
 
 import UserMenu from "./user-menu";
 import { DESKTOP_NAV, REPORT_ITEM } from "./layout/nav-items";
@@ -10,42 +11,61 @@ interface HeaderProps {
   isAuthenticated: boolean;
   userName: AuthSession["user"]["name"];
   userEmail: AuthSession["user"]["email"];
+  userRole?: string | null;
 }
 
 /** 64px header. On mobile only the logo and the Reportar shortcut stay; the rest moves to BottomNav. */
-export default function Header({ isAuthenticated, userName, userEmail }: HeaderProps) {
+export default function Header({ isAuthenticated, userName, userEmail, userRole }: HeaderProps) {
   return (
-    <header className="sticky top-0 z-50 border-b border-border bg-card">
-      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-4">
-        <div className="flex items-center gap-8">
+    <header className="sticky top-0 z-50 border-b border-border-subtle bg-surface-card">
+      <div className="flex h-16 items-center gap-8 px-4 md:px-6">
+        <div className="flex items-center gap-2.5">
           <Link
             to="/"
-            className="font-heading text-xl font-extrabold tracking-tight text-foreground"
+            className="text-[17px] font-semibold tracking-[-0.02em] text-text-primary hover:text-text-primary hover:no-underline"
           >
-            Andes Alerta
+            Andes Alerta<span className="text-accent-primary">.</span>
           </Link>
-          <nav aria-label="Principal" className="hidden items-center gap-1 md:flex">
-            {DESKTOP_NAV.map(({ to, label }) => (
-              <Link
-                key={to}
-                to={to as "/"}
-                activeOptions={{ exact: to === "/" }}
-                className="rounded-md px-3 py-2 text-[15px] font-medium text-muted-foreground transition-colors hover:text-foreground data-[status=active]:bg-brand-soft data-[status=active]:text-primary"
-              >
-                {label}
-              </Link>
-            ))}
-          </nav>
+          <Badge
+            variant="secondary"
+            className="hidden h-[22px] rounded-full bg-status-neutral-quiet px-2.5 text-xs text-text-secondary sm:inline-flex"
+          >
+            Demostración
+          </Badge>
         </div>
-        <div className="flex items-center gap-2">
+        <nav
+          aria-label="Principal"
+          className="hidden items-center gap-1 text-sm font-medium md:flex"
+        >
+          {DESKTOP_NAV.map(({ to, label }) => (
+            <Link
+              key={to}
+              to={to as "/"}
+              activeOptions={{ exact: to === "/" }}
+              className="rounded-lg px-3 py-2 text-text-secondary transition-colors hover:text-text-primary hover:no-underline data-[status=active]:bg-surface-quiet data-[status=active]:text-text-primary"
+            >
+              {label}
+            </Link>
+          ))}
+        </nav>
+        <div className="ml-auto flex items-center gap-2">
           <Link
             to={REPORT_ITEM.to as "/"}
-            className={cn(buttonVariants(), "h-10 px-4 text-sm font-semibold")}
+            className={cn(
+              buttonVariants(),
+              "h-[34px] gap-1.5 rounded-lg px-3.5 text-sm font-medium text-white hover:bg-accent-primary-hover hover:text-white hover:no-underline",
+            )}
           >
+            <Plus className="size-4" aria-hidden />
             {REPORT_ITEM.label}
           </Link>
           <div className={isAuthenticated ? "" : "hidden md:block"}>
-            <UserMenu userName={userName} userEmail={userEmail} isAuthenticated={isAuthenticated} />
+            <UserMenu
+              userName={userName}
+              userEmail={userEmail}
+              userRole={userRole}
+              isAuthenticated={isAuthenticated}
+            />
           </div>
         </div>
       </div>

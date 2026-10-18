@@ -10,23 +10,64 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as ReportarRouteImport } from './routes/reportar'
+import { Route as OrganizacionRouteImport } from './routes/organizacion'
+import { Route as MiLocalidadRouteImport } from './routes/mi-localidad'
 import { Route as MapaRouteImport } from './routes/mapa'
+import { Route as FuentesRouteImport } from './routes/fuentes'
+import { Route as DifusionRouteImport } from './routes/difusion'
+import { Route as CercaRouteImport } from './routes/cerca'
+import { Route as AyudarRouteImport } from './routes/ayudar'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as EventosIndexRouteImport } from './routes/eventos/index'
+import { Route as EventosIdRouteImport } from './routes/eventos/$id'
 import { Route as AuthSignupRouteImport } from './routes/auth/signup'
 import { Route as AuthLoginRouteImport } from './routes/auth/login'
 import { Route as AuthenticatedTodosIndexRouteImport } from './routes/_authenticated/todos/index'
+import { Route as AuthenticatedRevisionIndexRouteImport } from './routes/_authenticated/revision/index'
+import { Route as AuthenticatedMisReportesIndexRouteImport } from './routes/_authenticated/mis-reportes/index'
 import { Route as ApiV1SplatRouteImport } from './routes/api/v1/$'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
+import { Route as AuthenticatedRevisionIdRouteImport } from './routes/_authenticated/revision/$id'
 
 const ReportarRoute = ReportarRouteImport.update({
   id: '/reportar',
   path: '/reportar',
   getParentRoute: () => rootRouteImport,
 } as any)
+const OrganizacionRoute = OrganizacionRouteImport.update({
+  id: '/organizacion',
+  path: '/organizacion',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MiLocalidadRoute = MiLocalidadRouteImport.update({
+  id: '/mi-localidad',
+  path: '/mi-localidad',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const MapaRoute = MapaRouteImport.update({
   id: '/mapa',
   path: '/mapa',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FuentesRoute = FuentesRouteImport.update({
+  id: '/fuentes',
+  path: '/fuentes',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DifusionRoute = DifusionRouteImport.update({
+  id: '/difusion',
+  path: '/difusion',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CercaRoute = CercaRouteImport.update({
+  id: '/cerca',
+  path: '/cerca',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AyudarRoute = AyudarRouteImport.update({
+  id: '/ayudar',
+  path: '/ayudar',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedRoute = AuthenticatedRouteImport.update({
@@ -36,6 +77,16 @@ const AuthenticatedRoute = AuthenticatedRouteImport.update({
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EventosIndexRoute = EventosIndexRouteImport.update({
+  id: '/eventos/',
+  path: '/eventos/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EventosIdRoute = EventosIdRouteImport.update({
+  id: '/eventos/$id',
+  path: '/eventos/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthSignupRoute = AuthSignupRouteImport.update({
@@ -53,6 +104,18 @@ const AuthenticatedTodosIndexRoute = AuthenticatedTodosIndexRouteImport.update({
   path: '/todos/',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedRevisionIndexRoute =
+  AuthenticatedRevisionIndexRouteImport.update({
+    id: '/revision/',
+    path: '/revision/',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedMisReportesIndexRoute =
+  AuthenticatedMisReportesIndexRouteImport.update({
+    id: '/mis-reportes/',
+    path: '/mis-reportes/',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 const ApiV1SplatRoute = ApiV1SplatRouteImport.update({
   id: '/api/v1/$',
   path: '/api/v1/$',
@@ -63,80 +126,159 @@ const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   path: '/api/auth/$',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedRevisionIdRoute = AuthenticatedRevisionIdRouteImport.update({
+  id: '/revision/$id',
+  path: '/revision/$id',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/ayudar': typeof AyudarRoute
+  '/cerca': typeof CercaRoute
+  '/difusion': typeof DifusionRoute
+  '/fuentes': typeof FuentesRoute
   '/mapa': typeof MapaRoute
+  '/mi-localidad': typeof MiLocalidadRoute
+  '/organizacion': typeof OrganizacionRoute
   '/reportar': typeof ReportarRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/signup': typeof AuthSignupRoute
+  '/eventos/$id': typeof EventosIdRoute
+  '/eventos/': typeof EventosIndexRoute
+  '/revision/$id': typeof AuthenticatedRevisionIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/v1/$': typeof ApiV1SplatRoute
+  '/mis-reportes/': typeof AuthenticatedMisReportesIndexRoute
+  '/revision/': typeof AuthenticatedRevisionIndexRoute
   '/todos/': typeof AuthenticatedTodosIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/ayudar': typeof AyudarRoute
+  '/cerca': typeof CercaRoute
+  '/difusion': typeof DifusionRoute
+  '/fuentes': typeof FuentesRoute
   '/mapa': typeof MapaRoute
+  '/mi-localidad': typeof MiLocalidadRoute
+  '/organizacion': typeof OrganizacionRoute
   '/reportar': typeof ReportarRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/signup': typeof AuthSignupRoute
+  '/eventos/$id': typeof EventosIdRoute
+  '/eventos': typeof EventosIndexRoute
+  '/revision/$id': typeof AuthenticatedRevisionIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/v1/$': typeof ApiV1SplatRoute
+  '/mis-reportes': typeof AuthenticatedMisReportesIndexRoute
+  '/revision': typeof AuthenticatedRevisionIndexRoute
   '/todos': typeof AuthenticatedTodosIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteWithChildren
+  '/ayudar': typeof AyudarRoute
+  '/cerca': typeof CercaRoute
+  '/difusion': typeof DifusionRoute
+  '/fuentes': typeof FuentesRoute
   '/mapa': typeof MapaRoute
+  '/mi-localidad': typeof MiLocalidadRoute
+  '/organizacion': typeof OrganizacionRoute
   '/reportar': typeof ReportarRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/signup': typeof AuthSignupRoute
+  '/eventos/$id': typeof EventosIdRoute
+  '/eventos/': typeof EventosIndexRoute
+  '/_authenticated/revision/$id': typeof AuthenticatedRevisionIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/v1/$': typeof ApiV1SplatRoute
+  '/_authenticated/mis-reportes/': typeof AuthenticatedMisReportesIndexRoute
+  '/_authenticated/revision/': typeof AuthenticatedRevisionIndexRoute
   '/_authenticated/todos/': typeof AuthenticatedTodosIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/ayudar'
+    | '/cerca'
+    | '/difusion'
+    | '/fuentes'
     | '/mapa'
+    | '/mi-localidad'
+    | '/organizacion'
     | '/reportar'
     | '/auth/login'
     | '/auth/signup'
+    | '/eventos/$id'
+    | '/eventos/'
+    | '/revision/$id'
     | '/api/auth/$'
     | '/api/v1/$'
+    | '/mis-reportes/'
+    | '/revision/'
     | '/todos/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/ayudar'
+    | '/cerca'
+    | '/difusion'
+    | '/fuentes'
     | '/mapa'
+    | '/mi-localidad'
+    | '/organizacion'
     | '/reportar'
     | '/auth/login'
     | '/auth/signup'
+    | '/eventos/$id'
+    | '/eventos'
+    | '/revision/$id'
     | '/api/auth/$'
     | '/api/v1/$'
+    | '/mis-reportes'
+    | '/revision'
     | '/todos'
   id:
     | '__root__'
     | '/'
     | '/_authenticated'
+    | '/ayudar'
+    | '/cerca'
+    | '/difusion'
+    | '/fuentes'
     | '/mapa'
+    | '/mi-localidad'
+    | '/organizacion'
     | '/reportar'
     | '/auth/login'
     | '/auth/signup'
+    | '/eventos/$id'
+    | '/eventos/'
+    | '/_authenticated/revision/$id'
     | '/api/auth/$'
     | '/api/v1/$'
+    | '/_authenticated/mis-reportes/'
+    | '/_authenticated/revision/'
     | '/_authenticated/todos/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
+  AyudarRoute: typeof AyudarRoute
+  CercaRoute: typeof CercaRoute
+  DifusionRoute: typeof DifusionRoute
+  FuentesRoute: typeof FuentesRoute
   MapaRoute: typeof MapaRoute
+  MiLocalidadRoute: typeof MiLocalidadRoute
+  OrganizacionRoute: typeof OrganizacionRoute
   ReportarRoute: typeof ReportarRoute
   AuthLoginRoute: typeof AuthLoginRoute
   AuthSignupRoute: typeof AuthSignupRoute
+  EventosIdRoute: typeof EventosIdRoute
+  EventosIndexRoute: typeof EventosIndexRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
   ApiV1SplatRoute: typeof ApiV1SplatRoute
 }
@@ -150,11 +292,53 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ReportarRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/organizacion': {
+      id: '/organizacion'
+      path: '/organizacion'
+      fullPath: '/organizacion'
+      preLoaderRoute: typeof OrganizacionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/mi-localidad': {
+      id: '/mi-localidad'
+      path: '/mi-localidad'
+      fullPath: '/mi-localidad'
+      preLoaderRoute: typeof MiLocalidadRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/mapa': {
       id: '/mapa'
       path: '/mapa'
       fullPath: '/mapa'
       preLoaderRoute: typeof MapaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/fuentes': {
+      id: '/fuentes'
+      path: '/fuentes'
+      fullPath: '/fuentes'
+      preLoaderRoute: typeof FuentesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/difusion': {
+      id: '/difusion'
+      path: '/difusion'
+      fullPath: '/difusion'
+      preLoaderRoute: typeof DifusionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/cerca': {
+      id: '/cerca'
+      path: '/cerca'
+      fullPath: '/cerca'
+      preLoaderRoute: typeof CercaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ayudar': {
+      id: '/ayudar'
+      path: '/ayudar'
+      fullPath: '/ayudar'
+      preLoaderRoute: typeof AyudarRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated': {
@@ -169,6 +353,20 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/eventos/': {
+      id: '/eventos/'
+      path: '/eventos'
+      fullPath: '/eventos/'
+      preLoaderRoute: typeof EventosIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/eventos/$id': {
+      id: '/eventos/$id'
+      path: '/eventos/$id'
+      fullPath: '/eventos/$id'
+      preLoaderRoute: typeof EventosIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth/signup': {
@@ -192,6 +390,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedTodosIndexRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/revision/': {
+      id: '/_authenticated/revision/'
+      path: '/revision'
+      fullPath: '/revision/'
+      preLoaderRoute: typeof AuthenticatedRevisionIndexRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/mis-reportes/': {
+      id: '/_authenticated/mis-reportes/'
+      path: '/mis-reportes'
+      fullPath: '/mis-reportes/'
+      preLoaderRoute: typeof AuthenticatedMisReportesIndexRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/api/v1/$': {
       id: '/api/v1/$'
       path: '/api/v1/$'
@@ -206,14 +418,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAuthSplatRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/revision/$id': {
+      id: '/_authenticated/revision/$id'
+      path: '/revision/$id'
+      fullPath: '/revision/$id'
+      preLoaderRoute: typeof AuthenticatedRevisionIdRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
   }
 }
 
 interface AuthenticatedRouteChildren {
+  AuthenticatedRevisionIdRoute: typeof AuthenticatedRevisionIdRoute
+  AuthenticatedMisReportesIndexRoute: typeof AuthenticatedMisReportesIndexRoute
+  AuthenticatedRevisionIndexRoute: typeof AuthenticatedRevisionIndexRoute
   AuthenticatedTodosIndexRoute: typeof AuthenticatedTodosIndexRoute
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
+  AuthenticatedRevisionIdRoute: AuthenticatedRevisionIdRoute,
+  AuthenticatedMisReportesIndexRoute: AuthenticatedMisReportesIndexRoute,
+  AuthenticatedRevisionIndexRoute: AuthenticatedRevisionIndexRoute,
   AuthenticatedTodosIndexRoute: AuthenticatedTodosIndexRoute,
 }
 
@@ -224,10 +449,18 @@ const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRoute: AuthenticatedRouteWithChildren,
+  AyudarRoute: AyudarRoute,
+  CercaRoute: CercaRoute,
+  DifusionRoute: DifusionRoute,
+  FuentesRoute: FuentesRoute,
   MapaRoute: MapaRoute,
+  MiLocalidadRoute: MiLocalidadRoute,
+  OrganizacionRoute: OrganizacionRoute,
   ReportarRoute: ReportarRoute,
   AuthLoginRoute: AuthLoginRoute,
   AuthSignupRoute: AuthSignupRoute,
+  EventosIdRoute: EventosIdRoute,
+  EventosIndexRoute: EventosIndexRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
   ApiV1SplatRoute: ApiV1SplatRoute,
 }

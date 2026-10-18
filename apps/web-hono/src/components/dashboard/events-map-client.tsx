@@ -28,6 +28,8 @@ export default function EventsMapClient({
         if (!point) return null;
         const Icon = CATEGORY_ICONS[event.category];
         const selected = event.id === selectedId;
+        // Only an exact point is drawn solid; district centroid and approximate points are dashed.
+        const exact = event.place.precision === "exact";
         return (
           <MapMarker
             key={event.id}
@@ -39,10 +41,11 @@ export default function EventsMapClient({
               <div
                 aria-label={`${CATEGORY_LABELS[event.category]}: ${event.title}`}
                 className={cn(
-                  "flex size-9 items-center justify-center rounded-full border-2 bg-card text-foreground shadow-sm",
+                  "flex size-7 items-center justify-center rounded-full border-[1.5px] bg-card text-foreground shadow-sm",
+                  exact ? "border-solid" : "border-dashed",
                   selected
                     ? "scale-125 border-primary ring-4 ring-primary/30"
-                    : "border-foreground/70",
+                    : "border-foreground",
                 )}
               >
                 <Icon className="size-4" aria-hidden />
@@ -55,6 +58,7 @@ export default function EventsMapClient({
                   {event.place.territory.name}
                   {event.place.precision === "district" ? " · solo distrito" : ""}
                 </p>
+                {event.isDemo && <p className="text-xs font-medium text-warning">Demostración</p>}
               </div>
             </MarkerPopup>
           </MapMarker>
