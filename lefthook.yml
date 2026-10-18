@@ -20,13 +20,7 @@ commit-msg:
     - rebase
   jobs:
     - name: conventional-commit
-      run: |
-        first="$(head -1 {1})"
-        echo "$first" | grep -qE '^(fixup!|squash!|Merge |Revert )' && exit 0
-        echo "$first" | grep -qE '^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert)(\([a-zA-Z0-9._/-]+\))?!?: .+' && exit 0
-        echo "Commit message must follow Conventional Commits, e.g. 'feat(web): add recordings page'."
-        echo "release-please derives versions and changelogs from these prefixes."
-        exit 1
+      run: node scripts/check-commit-msg.mjs {1}
 
 # pre-push is the first of the three verification tiers (docs/adr/0001-release-pipeline.md):
 # the same `pnpm run verify` every release workflow runs on the tagged SHA before deploying.
