@@ -14,8 +14,8 @@
   "skill_document_id": null,
   "skill_document_url": null,
   "publication_status": "published_verified",
-  "last_verified_at": "2026-10-18T01:52:28Z",
-  "remote_updated_at": "2026-10-18T01:52:28.261Z",
-  "local_seed_version": "0.3",
-  "note": "v0.3 (2026-10-18): D-09 y D-06 actualizados en el documento 7 y verificado por lectura, con autorización explícita del usuario. Documentos 0 y 7 creados y verificados por lectura el 2026-10-17 con autorización explícita del usuario. La skill se distribuye en el repositorio; el documento 0 explica cómo cargarla. Los documentos 1 a 6 del proyecto no se modificaron."
+  "last_verified_at": "2026-10-18T07:02:59Z",
+  "remote_updated_at": "2026-10-18T07:02:59.547Z",
+  "local_seed_version": "0.4",
+  "note": "v0.4 (2026-10-18): pivote Cerca WhatsApp publicado en el documento 7 (base v0.3 de las 03:54:54Z) y verificado por lectura, con autorización explícita del usuario en el chat de la sesión de Claude Code (git KrelboyneGov) tras la alerta con antes/después. Los issues no se modificaron. v0.3 (2026-10-18): D-09 y D-06 actualizados en el documento 7 y verificado por lectura, con autorización explícita del usuario. Documentos 0 y 7 creados y verificados por lectura el 2026-10-17 con autorización explícita del usuario. La skill se distribuye en el repositorio; el documento 0 explica cómo cargarla. Los documentos 1 a 6 del proyecto no se modificaron."
 }
