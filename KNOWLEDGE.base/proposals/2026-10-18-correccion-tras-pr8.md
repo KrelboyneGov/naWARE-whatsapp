@@ -1,6 +1,6 @@
 # Propuesta: corregir tickets tras el PR #8 (contratos por capas)
 
-Estado: **borrador pendiente de autorización**. Linear no se ha modificado.
+Estado: **aplicada el 2026-10-18** con autorización explícita del usuario: «Sí, autorizo aplicar exactamente la propuesta 2026-10-18-correccion-tras-pr8 en NAW-17, NAW-6, NAW-8 y NAW-23». Antes de escribir se releyeron los 4 issues, que no tenían cambios desde las 01:51 UTC. Se aplicó entre las 02:18 y las 02:19 UTC y se verificó por lectura. Limitación: GitHub no respondía, así que no se pudo comprobar si `main` cambió después de e13e555 (fusión del PR #8).
 
 ## Motivo
 

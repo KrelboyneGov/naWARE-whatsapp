@@ -2,7 +2,7 @@
 
 Estado: **aplicada el 2026-10-18** con autorización explícita del usuario: «Sí, autorizo aplicar exactamente la propuesta 2026-10-18-limpieza-tickets-stack: los 14 tickets y D-06». Los 14 issues se actualizaron entre las 01:35 y las 01:51 UTC, y D-06 a las 01:52:28 UTC; todo se verificó por lectura. Antes de escribir se releyeron los issues: NAW-22 había cambiado a las 01:06 solo por un carácter «|» accidental, que quedó reemplazado por la reescritura autorizada. Además, se añadió una nota de versión en la cabecera del documento 7.
 
-**Corrección pendiente:** el PR #8 (commit 2eaadec, 01:04 UTC) se fusionó antes de estas escrituras y no se revisó. Por eso NAW-17 afirma que `Community`, `SemaforoCell` e `Ingestor<T>` no existen, y NAW-6, NAW-8 y NAW-23 citan puertos que no son el genérico `Ingestor<T>`. Ver `2026-10-18-correccion-tras-pr8.md`.
+**Corrección aplicada (02:18 UTC):** el PR #8 (commit 2eaadec, 01:04 UTC) se fusionó antes de estas escrituras y no se revisó. Por eso NAW-17 afirma que `Community`, `SemaforoCell` e `Ingestor<T>` no existen, y NAW-6, NAW-8 y NAW-23 citan puertos que no son el genérico `Ingestor<T>`. Ver `2026-10-18-correccion-tras-pr8.md`.
 
 Base: issues leídos el 2026-10-18 hacia las 01:00 UTC (NAW-5 fue editado por otra persona a las 00:57; se releerá todo antes de escribir). Matriz v0.3 (doc 7, 00:46:41Z). Código de `main` en df52304.
 
