@@ -39,7 +39,12 @@ export type LocalityOverview = z.infer<typeof localityOverviewSchema>;
 export const nearbyInputSchema = z.object({
   center: geoPointSchema,
   centerSource: z.enum(["gps", "manual"]),
-  radiusKm: z.union(NEARBY_RADII_KM.map((r) => z.literal(r)) as never),
+  radiusKm: z.union([
+    z.literal(NEARBY_RADII_KM[0]),
+    z.literal(NEARBY_RADII_KM[1]),
+    z.literal(NEARBY_RADII_KM[2]),
+    z.literal(NEARBY_RADII_KM[3]),
+  ]),
   kind: z.enum(["events", "road_incidents", "help"]),
 });
 export type NearbyInput = z.infer<typeof nearbyInputSchema>;
