@@ -1,5 +1,11 @@
 export type { ITodoRepository } from "./todo.repository";
-export type { IClock, IIdGenerator, IFileStorage, IOfficialNoticeImporter } from "./ports";
+export type {
+  IClock,
+  IIdGenerator,
+  IFileStorage,
+  IOfficialNoticeImporter,
+  Ingestor,
+} from "./ports";
 export type { IEventRepository, EventPage } from "./event.repository";
 export type { IEvidenceRepository } from "./evidence.repository";
 export type { IReviewRepository } from "./review.repository";
