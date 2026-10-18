@@ -7,12 +7,8 @@ import { CONSENT_LABEL } from "@emergency-map/domain/schemas";
 import { FieldShell } from "@/components/layout/auth-card";
 import { authClient } from "@/lib/auth/auth-client";
 import { client } from "@/lib/orpc-client";
-import { env } from "@/env/client";
-
-const whatsappDigits = (env.VITE_WHATSAPP_BUSINESS_NUMBER ?? "").replace(/\D/g, "");
-const whatsappLink = whatsappDigits
-  ? `https://wa.me/${whatsappDigits}?text=${encodeURIComponent("Hola")}`
-  : null;
+import { districtFromPoint } from "@/lib/reverse-geocode";
+import { whatsappHolaLink as whatsappLink } from "@/lib/whatsapp";
 
 /** `redirectTo` stays available after the account exists; the success panel explains the Hola step. */
 export default function SignUpForm({ redirectTo = "/" }: { redirectTo?: string }) {
@@ -218,25 +214,33 @@ export default function SignUpForm({ redirectTo = "/" }: { redirectTo?: string }
             return;
           }
           setLocating(true);
+          setFormError(null);
           navigator.geolocation.getCurrentPosition(
-            (position) => {
-              setPoint({ lat: position.coords.latitude, lng: position.coords.longitude });
+            async (position) => {
+              const { latitude, longitude } = position.coords;
+              setPoint({ lat: latitude, lng: longitude });
+              const district = await districtFromPoint(latitude, longitude);
               setLocating(false);
+              if (district) {
+                form.setFieldValue("districtName", district);
+              } else {
+                setFormError("No encontramos tu distrito con la ubicación. Escríbelo a mano.");
+              }
             },
             () => {
               setPoint(null);
               setLocating(false);
               setFormError("No pudimos leer la ubicación. Escribe el distrito a mano.");
             },
+            { enableHighAccuracy: false, timeout: 15_000, maximumAge: 300_000 },
           );
         }}
       >
-        {locating
-          ? "Buscando ubicación..."
-          : point
-            ? "Ubicación lista para resolver el distrito"
-            : "Usar mi ubicación"}
+        {locating ? "Buscando tu distrito…" : "Usar mi ubicación"}
       </Button>
+      <p className="-mt-2 text-[13px] text-text-secondary">
+        Solo usamos tu ubicación para completar el distrito; puedes corregirlo.
+      </p>
 
       <form.Field name="consent">
         {(field) => (

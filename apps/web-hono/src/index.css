@@ -1,7 +1,8 @@
 @import "@emergency-map/web-ui/styles.css";
 
 /*
- * Andes Alerta visual system = Niway design system + blue accent (#175CD3).
+ * KlAimate visual system: Niway token names, Andean earth palette (terracota, ocre, cacao,
+ * verde de puna on crema) and Alegreya type (Huerta Tipográfica, Latin American foundry).
  * Light mode only: the `.dark` class is never set, so the dark block inherited from web-ui is inert.
  *
  * TOKEN CLASSES FOR SCREENS (all work with bg-/text-/border-/ring-/shadow- prefixes):
@@ -21,31 +22,31 @@
  */
 :root {
   /* Niway neutrals */
-  --neutral-0: #ffffff;
-  --neutral-25: #fcfcfd;
-  --neutral-50: #f5f5f7;
-  --neutral-100: #f2f2f2;
-  --neutral-200: #e5e5e5;
-  --neutral-300: #d2d2d7;
-  --neutral-400: #aeaeb2;
-  --neutral-500: #8e8e93;
-  --neutral-600: #6e6e73;
-  --neutral-800: #3a3a3c;
-  --neutral-900: #111111;
+  --neutral-0: #fffdf8;
+  --neutral-25: #fdf9f2;
+  --neutral-50: #f7efe2;
+  --neutral-100: #f1e6d4;
+  --neutral-200: #e6d6bd;
+  --neutral-300: #cfb994;
+  --neutral-400: #a68d73;
+  --neutral-500: #8a715b;
+  --neutral-600: #6a5242;
+  --neutral-800: #3d2a1f;
+  --neutral-900: #2a1b12;
 
-  /* Blue accent override (replaces Niway violet) */
-  --accent-primary: #175cd3;
-  --accent-primary-hover: #124bb0;
-  --accent-primary-quiet: #eff5ff;
+  /* Terracota accent (Andean ceramics and textiles) */
+  --accent-primary: #b4442a;
+  --accent-primary-hover: #963520;
+  --accent-primary-quiet: #fbe9e1;
 
   /* Niway semantic aliases */
-  --surface-page: var(--neutral-0);
+  --surface-page: var(--neutral-25);
   --surface-card: var(--neutral-0);
   --surface-secondary: var(--neutral-50);
   --surface-quiet: var(--neutral-100);
   --surface-hover: var(--neutral-100);
   --surface-inverse: var(--neutral-900);
-  --surface-scrim: rgba(17, 17, 17, 0.32);
+  --surface-scrim: rgba(42, 27, 18, 0.36);
 
   --text-primary: var(--neutral-900);
   --text-secondary: var(--neutral-600);
@@ -59,25 +60,25 @@
   --border-strong: var(--neutral-300);
   --border-accent: var(--accent-primary);
 
-  --status-positive: #0bae7b;
-  --status-positive-quiet: #e7faf3;
-  --status-warning: #d98a00;
-  --status-warning-quiet: #fff6e5;
-  --status-danger: #e5484d;
-  --status-danger-quiet: #ffefef;
+  --status-positive: #2e7d4f;
+  --status-positive-quiet: #e6f1e8;
+  --status-warning: #c47f0a;
+  --status-warning-quiet: #fcf0d6;
+  --status-danger: #c2362b;
+  --status-danger-quiet: #fbe7e3;
   --status-neutral: var(--neutral-600);
   --status-neutral-quiet: var(--neutral-100);
 
-  --shadow-xs: 0 1px 2px rgba(17, 17, 17, 0.04);
-  --shadow-sm: 0 1px 3px rgba(17, 17, 17, 0.06), 0 1px 1px rgba(17, 17, 17, 0.03);
-  --shadow-md: 0 4px 16px rgba(17, 17, 17, 0.07);
-  --shadow-lg: 0 12px 32px rgba(17, 17, 17, 0.1), 0 2px 6px rgba(17, 17, 17, 0.04);
-  --shadow-overlay: 0 24px 64px rgba(17, 17, 17, 0.14), 0 2px 8px rgba(17, 17, 17, 0.06);
-  --focus-ring: 0 0 0 3px rgba(23, 92, 211, 0.22);
+  --shadow-xs: 0 1px 2px rgba(42, 27, 18, 0.04);
+  --shadow-sm: 0 1px 3px rgba(42, 27, 18, 0.06), 0 1px 1px rgba(42, 27, 18, 0.03);
+  --shadow-md: 0 4px 16px rgba(42, 27, 18, 0.07);
+  --shadow-lg: 0 12px 32px rgba(42, 27, 18, 0.1), 0 2px 6px rgba(42, 27, 18, 0.04);
+  --shadow-overlay: 0 24px 64px rgba(42, 27, 18, 0.14), 0 2px 8px rgba(42, 27, 18, 0.06);
+  --focus-ring: 0 0 0 3px rgba(180, 68, 42, 0.28);
 
   /* Domain colours (text-safe variants kept from the previous palette) */
-  --help: #087f75;
-  --help-quiet: #e6f4f2;
+  --help: #2e6b4f;
+  --help-quiet: #e5efe7;
   --warning: #8a5700;
   --warning-bg: #fff6db;
   --error: #b42318;
@@ -90,6 +91,13 @@
   --line: var(--border-subtle);
   --brand: var(--accent-primary);
   --brand-soft: var(--accent-primary-quiet);
+
+  /* Andean pattern colours and the WhatsApp channel (white text passes AA on --whatsapp) */
+  --ocre: #e0a526;
+  --cacao: #2a1b12;
+  --puna: #2e6b4f;
+  --whatsapp: #128c4a;
+  --whatsapp-hover: #0e733c;
 
   /* shadcn variables */
   --background: var(--surface-page);
@@ -110,13 +118,12 @@
   --border: var(--border-subtle);
   --input: var(--border-strong);
   --ring: var(--accent-primary);
-  --radius: 0.75rem;
+  --radius: 0.875rem;
 }
 
 @theme inline {
-  --font-sans:
-    "Geist", "SF Pro Text", -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif;
-  --font-heading: "Geist", "SF Pro Display", -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-sans: "Alegreya Sans", "Segoe UI", -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-heading: "Alegreya", Georgia, "Times New Roman", serif;
   --font-mono: "Geist Mono", "SF Mono", ui-monospace, Menlo, monospace;
   --radius-xs: 4px;
   --radius-sm: 6px;
@@ -170,6 +177,11 @@
   --color-error: var(--error);
   --color-error-bg: var(--error-bg);
   --color-brand-soft: var(--brand-soft);
+  --color-ocre: var(--ocre);
+  --color-cacao: var(--cacao);
+  --color-puna: var(--puna);
+  --color-whatsapp: var(--whatsapp);
+  --color-whatsapp-hover: var(--whatsapp-hover);
 }
 
 @layer base {
@@ -180,9 +192,8 @@
     background: var(--surface-page);
     color: var(--text-primary);
     font-family: var(--font-sans);
-    font-size: 15px;
+    font-size: 16px;
     line-height: 1.55;
-    letter-spacing: -0.003em;
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
   }
@@ -191,8 +202,8 @@
   h3,
   h4 {
     font-family: var(--font-heading);
-    font-weight: 600;
-    letter-spacing: -0.016em;
+    font-weight: 700;
+    letter-spacing: -0.005em;
     text-wrap: pretty;
   }
   ::selection {
@@ -226,5 +237,25 @@
   }
   .maplibregl-ctrl-attrib-button {
     @apply bg-transparent! dark:invert;
+  }
+}
+
+/*
+ * Andean shapes. `.andean-band` is a stepped (escalonado) frieze in cacao, terracota and ocre,
+ * the motif of Andean textiles and Chan Chan walls. `.tocapu-field` is a faint grid of
+ * tocapu squares for hero surfaces. Both are decorative: aria-hidden on the element.
+ */
+@layer components {
+  .andean-band {
+    height: 10px;
+    background-color: var(--cacao);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='10' viewBox='0 0 40 10'%3E%3Cpath d='M0 10h4V8h4V6h4V4h4V2h8v2h4v2h4v2h4v2h4z' fill='%23b4442a'/%3E%3Cpath d='M16 10V6h8v4z' fill='%23e0a526'/%3E%3C/svg%3E");
+    background-repeat: repeat-x;
+    background-size: 40px 10px;
+  }
+  .tocapu-field {
+    background-color: var(--surface-secondary);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 48 48'%3E%3Cg fill='none' stroke='%23b4442a' stroke-opacity='.12' stroke-width='2'%3E%3Crect x='6' y='6' width='12' height='12'/%3E%3Cpath d='M30 6h12v12H30zM34 10h4v4h-4zM6 30h12v12H6zM10 34h4v4h-4z'/%3E%3Crect x='30' y='30' width='12' height='12'/%3E%3C/g%3E%3C/svg%3E");
+    background-size: 48px 48px;
   }
 }
