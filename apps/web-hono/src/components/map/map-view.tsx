@@ -30,6 +30,7 @@ import {
 } from "@/lib/labels";
 import { LAYER_LABELS, MAP_LAYERS, type MapLayer } from "@/lib/map-filters";
 import { cn } from "@emergency-map/web-ui";
+import { DESKTOP_QUERY, useMediaQuery } from "@/lib/use-media-query";
 import { CATEGORY_ICONS } from "./category-icons";
 import { MapOriginBadge, MapReviewBadge } from "./badges";
 
@@ -188,6 +189,7 @@ export default function MapView(props: MapViewProps) {
     lng: number;
     lat: number;
   } | null>(null);
+  const isDesktop = useMediaQuery(DESKTOP_QUERY, true);
   const selected = events.find((e) => e.id === selectedId);
   const popupNotice = notices.find((n) => n.id === noticePopup?.id);
 
@@ -257,7 +259,7 @@ export default function MapView(props: MapViewProps) {
             </MapMarker>
           ))}
 
-        {selected?.place.point && layerOn.events && (
+        {isDesktop && selected?.place.point && layerOn.events && (
           <MapPopup
             longitude={selected.place.point.lng}
             latitude={selected.place.point.lat}
@@ -329,7 +331,8 @@ export default function MapView(props: MapViewProps) {
       </div>
 
       <div className="absolute top-2 right-2 flex max-w-[15rem] flex-col gap-2">
-        <details className="bg-background rounded-md border text-xs shadow-sm" open>
+        {/* Collapsed on phones so the panel does not cover half of the map. */}
+        <details className="bg-background rounded-md border text-xs shadow-sm" open={isDesktop}>
           <summary className="flex cursor-pointer items-center gap-1.5 px-2.5 py-1.5 font-medium">
             <Layers className="size-3.5" aria-hidden /> Capas
           </summary>
@@ -379,8 +382,14 @@ export default function MapView(props: MapViewProps) {
       </div>
 
       <div className="absolute top-2 left-2 flex flex-col items-start">
-        <Button size="sm" variant="outline" className="bg-background" onClick={props.onReset}>
-          <Home aria-hidden /> Volver a Perú
+        <Button
+          size="sm"
+          variant="outline"
+          className="bg-background max-md:size-9 max-md:px-0"
+          aria-label="Volver a Perú"
+          onClick={props.onReset}
+        >
+          <Home aria-hidden /> <span className="max-md:sr-only">Volver a Perú</span>
         </Button>
         {boundsMode && (
           <p className="bg-background mt-1 rounded border px-2 py-1 text-xs shadow-sm">

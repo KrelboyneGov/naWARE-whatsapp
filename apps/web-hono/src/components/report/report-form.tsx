@@ -217,9 +217,15 @@ export function ReportForm({ isAuthenticated }: { isAuthenticated: boolean }) {
 
   const stepper = (
     <nav aria-label="Pasos del reporte">
-      <p className="text-muted-foreground text-sm lg:hidden">
-        Paso {draft.step} de 4 · {STEPS[draft.step - 1]}
-      </p>
+      {/* Phones: a progress bar; the step name is already the form's h2. */}
+      <ol className="grid grid-cols-4 gap-1.5 lg:hidden" aria-hidden>
+        {STEPS.map((label, i) => (
+          <li
+            key={label}
+            className={cn("h-1 rounded-full", i < draft.step ? "bg-primary" : "bg-muted")}
+          />
+        ))}
+      </ol>
       <ol className="hidden gap-1 lg:grid">
         {STEPS.map((label, i) => {
           const n = (i + 1) as ReportDraft["step"];
@@ -260,12 +266,12 @@ export function ReportForm({ isAuthenticated }: { isAuthenticated: boolean }) {
 
   return (
     <div className="grid items-start gap-8 lg:grid-cols-[240px_minmax(0,1fr)] lg:gap-12">
-      <aside className="grid gap-6 lg:sticky lg:top-6">
+      <aside className="grid gap-4 lg:sticky lg:top-6 lg:gap-6">
         <div className="grid gap-1.5">
-          <h1 className="text-[26px] leading-[1.18] font-semibold tracking-tight">
+          <h1 className="text-[22px] leading-[1.18] font-semibold tracking-tight lg:text-[26px]">
             Cuéntanos qué está pasando
           </h1>
-          <p className="text-sm text-[var(--text-secondary)] text-pretty">
+          <p className="hidden text-sm text-[var(--text-secondary)] text-pretty sm:block">
             Comparte lo que observaste y dónde ocurrió. Tu aporte pasará por controles antes de
             publicarse.
           </p>
@@ -283,7 +289,11 @@ export function ReportForm({ isAuthenticated }: { isAuthenticated: boolean }) {
             {savedNote}
           </span>
         </div>
-        <Button variant="ghost" className="justify-start" onClick={saveAndExit}>
+        <Button
+          variant="ghost"
+          className="hidden justify-start lg:inline-flex"
+          onClick={saveAndExit}
+        >
           Guardar borrador y salir
         </Button>
       </aside>
@@ -368,8 +378,12 @@ export function ReportForm({ isAuthenticated }: { isAuthenticated: boolean }) {
           </p>
         )}
 
-        <div className="flex flex-wrap items-center justify-between gap-3 border-t pt-4">
+        {/* Phones: the step buttons stay above the bottom nav (3.5rem + safe area). */}
+        <div className="bg-background sticky bottom-[calc(3.5rem+env(safe-area-inset-bottom))] z-30 -mx-4 flex flex-wrap items-center justify-between gap-3 border-t px-4 py-3 md:static md:mx-0 md:px-0 md:pt-4 md:pb-0">
           <div className="flex gap-2">
+            <Button variant="ghost" className="lg:hidden" onClick={saveAndExit}>
+              Guardar y salir
+            </Button>
             {draft.step > 1 && (
               <Button
                 variant="outline"

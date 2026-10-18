@@ -9,7 +9,7 @@ export const Route = createFileRoute("/reportar")({
 function ReportarPage() {
   const { isAuthenticated } = Route.useRouteContext();
   return (
-    <main className="mx-auto w-full max-w-[1100px] px-4 py-8 md:px-10">
+    <main className="mx-auto w-full max-w-[1100px] px-4 pt-5 md:px-10 md:py-8">
       <ReportForm isAuthenticated={isAuthenticated} />
     </main>
   );

@@ -12,12 +12,27 @@ interface HeaderProps {
   userName: AuthSession["user"]["name"];
   userEmail: AuthSession["user"]["email"];
   userRole?: string | null;
+  hideOnMobile?: boolean;
 }
 
-/** 64px header. On mobile only the logo and the Reportar shortcut stay; the rest moves to BottomNav. */
-export default function Header({ isAuthenticated, userName, userEmail, userRole }: HeaderProps) {
+/**
+ * 64px header. On mobile only the logo and the account menu stay: navigation and Reportar live in
+ * BottomNav. `hideOnMobile` drops it on full-screen routes such as /mapa.
+ */
+export default function Header({
+  isAuthenticated,
+  userName,
+  userEmail,
+  userRole,
+  hideOnMobile = false,
+}: HeaderProps) {
   return (
-    <header className="sticky top-0 z-50 border-b border-border-subtle bg-surface-card">
+    <header
+      className={cn(
+        "sticky top-0 z-50 border-b border-border-subtle bg-surface-card",
+        hideOnMobile && "max-md:hidden",
+      )}
+    >
       <div className="flex h-16 items-center gap-8 px-4 md:px-6">
         <div className="flex items-center gap-2.5">
           <Link
@@ -53,7 +68,7 @@ export default function Header({ isAuthenticated, userName, userEmail, userRole 
             to={REPORT_ITEM.to as "/"}
             className={cn(
               buttonVariants(),
-              "h-[34px] gap-1.5 rounded-lg px-3.5 text-sm font-medium text-white hover:bg-accent-primary-hover hover:text-white hover:no-underline",
+              "hidden h-[34px] gap-1.5 md:inline-flex rounded-lg px-3.5 text-sm font-medium text-white hover:bg-accent-primary-hover hover:text-white hover:no-underline",
             )}
           >
             <Plus className="size-4" aria-hidden />

@@ -4,10 +4,16 @@ import { formatDemoClock } from "@/lib/demo-clock";
 export function PrototypeBar() {
   return (
     <div className="bg-[#111] text-white">
-      <div className="flex h-8 items-center gap-5 overflow-hidden px-5 font-mono text-xs whitespace-nowrap">
-        <span className="uppercase tracking-[0.06em]">Barra de prototipo</span>
+      <div className="flex h-8 items-center gap-3 overflow-hidden px-3 font-mono text-[11px] whitespace-nowrap sm:gap-5 sm:px-5 sm:text-xs">
+        <span className="uppercase tracking-[0.06em]">
+          <span className="sm:hidden">Prototipo</span>
+          <span className="hidden sm:inline">Barra de prototipo</span>
+        </span>
         <span className="hidden sm:inline">Datos de demostración</span>
-        <span className="tabular ml-auto">Reloj demo: {formatDemoClock()} (Lima)</span>
+        <span className="tabular ml-auto truncate">
+          <span className="hidden sm:inline">Reloj demo: </span>
+          {formatDemoClock()} (Lima)
+        </span>
       </div>
     </div>
   );

@@ -11,19 +11,29 @@ import { ReviewBadge } from "../event/review-badge";
 import { CATEGORY_ICONS } from "./category-icons";
 import { CATEGORY_LABELS, PRECISION_LABELS, formatDateTime, formatRelative } from "@/lib/labels";
 
+interface EventDetailProps {
+  event: PublicEvent;
+  now: Date;
+  onClose: () => void;
+}
+
 /**
  * Side sheet of the selected event on /mapa (desktop). Shows the four dimensions separately and
  * only what the public read model carries; evidence, sources and history live on the detail page.
  */
-export function EventDetailPanel({
-  event,
-  now,
-  onClose,
-}: {
-  event: PublicEvent;
-  now: Date;
-  onClose: () => void;
-}) {
+export function EventDetailPanel(props: EventDetailProps) {
+  return (
+    <aside
+      aria-label={props.event.title}
+      className="bg-background order-3 hidden min-h-0 w-[400px] shrink-0 flex-col border-l lg:flex"
+    >
+      <EventDetailContent {...props} />
+    </aside>
+  );
+}
+
+/** The selected event's card, shared by the desktop side sheet and the mobile bottom sheet. */
+export function EventDetailContent({ event, now, onClose }: EventDetailProps) {
   const [shareMsg, setShareMsg] = useState<string | null>(null);
   const Icon = CATEGORY_ICONS[event.category];
   const t = event.place.territory;
@@ -40,10 +50,7 @@ export function EventDetailPanel({
   };
 
   return (
-    <aside
-      aria-label={event.title}
-      className="bg-background hidden min-h-0 w-[400px] shrink-0 flex-col border-l lg:flex"
-    >
+    <>
       <div className="flex items-center justify-between border-b px-4 py-3">
         <span className="font-mono text-xs text-[var(--text-secondary)]">{event.id}</span>
         <div className="flex gap-1">
@@ -121,6 +128,6 @@ export function EventDetailPanel({
           «publicado» no significa que el hecho esté comprobado.
         </p>
       </div>
-    </aside>
+    </>
   );
 }
