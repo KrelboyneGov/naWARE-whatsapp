@@ -397,3 +397,18 @@ _(La autorización de la matriz no cubre las ediciones de issues de la sección 
   - La propuesta v0.3 de mapa por capas sigue sin aplicarse (esta la absorbe).
   - Hay contradicciones semáforo ↔ ADR 0008, horizontal ↔ vertical y responsables ↔ D-07.
   - Todo lo marcado **a verificar** en la sección 5.
+
+---
+
+## 8. Registro de aplicación (2026-10-18)
+
+- **Matriz:** autorizada por escrito en el chat por el usuario de la sesión de Claude Code (git KrelboyneGov): «Autorizo aplicar exactamente los cambios de la ALERTA naWARE a la matriz (v0.3 → v0.4) y publicarlos en Linear. Los issues todavía no.» Publicada en el documento 7 con ediciones parciales (base 03:54:54.062Z → 07:02:59.547Z) y verificada por lectura. Copia local sincronizada en el commit 078ea3f.
+- **Issues:** autorizados aparte: «Autorizo aplicar exactamente los cambios de issues de la sección 3 de la propuesta (prioridades, cancelaciones, archivados y reescrituras por capa) y crear N-1 a N-4 en P-NAW-2.» Aplicados y verificados por lectura entre 07:11Z y 08:12Z:
+  - 3.1: NAW-26 a NAW-35, con delta «Delta pivote v0.4», títulos y prioridades. NAW-28 bloqueado por NAW-8, NAW-9, NAW-27, NAW-29 y NAW-37.
+  - 3.2: NAW-1 a NAW-4, NAW-11, NAW-14 y NAW-25 cancelados. NAW-6 a Medium; NAW-18, NAW-22 y NAW-23 a Low. NAW-9, NAW-12, NAW-15 y NAW-19 modificados. Comentarios en NAW-7, NAW-8, NAW-10, NAW-13, NAW-16, NAW-17, NAW-20 y NAW-21. NAW-5 y NAW-24 sin cambios.
+  - Sección 4: N-1 = NAW-36, N-2 = NAW-37, N-3 = NAW-38 y N-4 = NAW-39, en P-NAW-2.
+- **Desviaciones conocidas:**
+  - Linear creó por su cuenta relaciones «relacionado con» de NAW-39 hacia NAW-8 y NAW-29.
+  - NAW-9 → NAW-28 pasó de «relacionado» a «bloquea», porque Linear admite una sola relación por par.
+  - Los issues nuevos no llevan la etiqueta «Feature».
+  - Quedan textos antiguos no cubiertos por la sección 3.1: «2.000 msgs gratis» en NAW-26, «clima/semáforo» en NAW-33, «Camila (semáforo)» en NAW-28 y el QR `?text=Hola` en NAW-34.
