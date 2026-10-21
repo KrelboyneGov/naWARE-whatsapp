@@ -107,3 +107,17 @@ pnpm run whatsapp:templates -- --submit
 - Los temas de interés guardan el distrito en claro para poder comparar el seguimiento. El número y el texto de la conversación van cifrados.
 - Los números 119 y 116 están marcados «verificar antes de producción».
 - La Ley 29733 y el registro ANPD siguen por verificar. La página `/privacidad` lo dice.
+
+## Formato recordado opcional (Atomic Memory)
+
+Desactivado por defecto. Configurar juntas `ATOMICMEMORY_API_URL` y `ATOMICMEMORY_API_KEY` en `apps/server-hono/.env`. Cloud: `https://api.atomicstrata.ai` y clave de proyecto `amc_…`. Core local: `http://127.0.0.1:17350` y su `CORE_API_KEY`. La credencial nunca va al cliente. Sin configurar, el agente conserva su comportamiento actual.
+
+- `RECUERDA prefiero respuestas por puntos` hace que las próximas respuestas lleguen en una lista legible en WhatsApp.
+- `RECUERDA prefiero respuestas en párrafos` corrige esa elección. Se mantiene una sola preferencia actual mediante `metadata.externalId`.
+- `QUÉ RECUERDAS` permite revisarla. `OLVIDA` la elimina y recupera la presentación original. Ambos comandos siguen disponibles después de `BAJA`; guardar una preferencia nueva no.
+
+Solo se aceptan esas dos elecciones. No se guarda texto libre ni se envían teléfonos, preguntas, distritos o avisos a Atomic Memory. La presentación conserva todas las frases de la respuesta verificada, incluidas fuentes, horas y advertencias. La memoria no interviene en los datos del clima, el nivel de alerta ni el prompt del modelo.
+
+El sujeto `klaimate:subscriber:<id>` se deriva en el servidor del suscriptor encontrado por hash del teléfono en el webhook firmado. Se usa únicamente `user_id`, sin thread compartido, con `source_site=klaimate-whatsapp`. La preferencia se consulta por lista exacta, evitando que una búsqueda semántica de clima no encuentre una elección de formato.
+
+Endpoints: `POST /v1/memories/ingest/quick`, `GET /v1/memories/list`, `DELETE /v1/memories/{id}?user_id=…`. Cada operación tiene un límite de 1,5 s, incluyendo el borrado de varias páginas. Los recibos de guardado y borrado deben confirmar el resultado; ante una respuesta ambigua se explica que no se pudo confirmar y se permite reintentar. El borrado por retención conserva su fecha pendiente si falla el proveedor y el siguiente cron reintenta el mismo sujeto. Si se desactiva la integración después de usarla, gestionar primero el borrado o la retención en la instancia: sin credenciales la aplicación no puede borrar allí.

@@ -9,3 +9,4 @@ export * from "./zavu-signature";
 export * from "./template-policy";
 export * from "./agent-safety";
 export * from "./semaphore";
+export * from "./assistant-memory";

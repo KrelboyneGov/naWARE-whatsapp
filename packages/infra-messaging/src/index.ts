@@ -7,6 +7,8 @@ export {
   createZavuNotifier,
 } from "./zavu";
 export { createOpenMeteoForecast } from "./forecast";
+export { ATOMIC_MEMORY_SOURCE_SITE, createAtomicMemory } from "./atomic-memory";
+export type { AtomicMemoryOptions } from "./atomic-memory";
 export {
   createSenamhiNoticesSource,
   isRainNotice,

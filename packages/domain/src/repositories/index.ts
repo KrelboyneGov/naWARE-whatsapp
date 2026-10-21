@@ -32,6 +32,13 @@ export type {
   LlmCompletion,
   ForecastQuery,
   ForecastSnapshot,
+  MemorySubject,
+  RememberedKind,
+  RememberedItem,
+  MemoryReadResult,
+  MemoryWriteResult,
+  MemoryDeleteResult,
+  IConversationMemoryPort,
 } from "./messaging";
 
 import type { ITodoRepository } from "./todo.repository";

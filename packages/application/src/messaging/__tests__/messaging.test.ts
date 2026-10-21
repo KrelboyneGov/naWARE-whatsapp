@@ -1,6 +1,12 @@
 import { describe, expect, it } from "vitest";
 import type { Event, OfficialNotice, Territory } from "@emergency-map/domain/schemas";
-import type { INotificationPort, NotificationSendResult } from "@emergency-map/domain/repositories";
+import type {
+  IConversationMemoryPort,
+  INotificationPort,
+  MemorySubject,
+  NotificationSendResult,
+  RememberedItem,
+} from "@emergency-map/domain/repositories";
 import {
   TEST_ENCRYPTION_KEY,
   TEST_HASH_KEY,
@@ -440,4 +446,287 @@ describe("handleZavuWebhook", () => {
     expect(second.body).toMatchObject({ duplicate: true });
     expect(env.sent).toHaveLength(1);
   });
+});
+
+/** In-process port double keyed by subject. The HTTP adapter has its own fixture test. */
+function memoryDouble(mode: "ok" | "down" = "ok") {
+  const bySubject = new Map<string, RememberedItem[]>();
+  let seq = 0;
+  const down = { status: "unavailable", reason: "fixture_down" } as const;
+  const port: IConversationMemoryPort = {
+    async recall({ subject }) {
+      return mode === "down" ? down : { status: "ok", items: [...(bySubject.get(subject) ?? [])] };
+    },
+    async list({ subject }) {
+      return mode === "down" ? down : { status: "ok", items: [...(bySubject.get(subject) ?? [])] };
+    },
+    async remember({ subject, kind, text }) {
+      if (mode === "down") return down;
+      seq += 1;
+      bySubject.set(subject, [{ id: `m${seq}`, kind, text, savedAt: null }]);
+      return { status: "saved" };
+    },
+    async forget({ subject, id }) {
+      if (mode === "down") return down;
+      const items = bySubject.get(subject) ?? [];
+      if (!items.some((item) => item.id === id)) return { status: "not_found" };
+      bySubject.set(
+        subject,
+        items.filter((item) => item.id !== id),
+      );
+      return { status: "deleted", count: 1 };
+    },
+    async forgetAll({ subject }) {
+      if (mode === "down") return down;
+      const count = bySubject.get(subject)?.length ?? 0;
+      bySubject.delete(subject);
+      return { status: "deleted", count };
+    },
+  };
+  return { port, bySubject };
+}
+
+const QUESTION = "Planeo viajar a Piura el martes, ¿todo bien?";
+
+describe("WhatsApp assistant memory", () => {
+  it("is off by default: nothing is stored and the reply says so", async () => {
+    const env = await registered();
+    await handleInboundMessage(env.deps, { from: PHONE, text: "Hola", messageId: "m-1" });
+    const saved = await handleInboundMessage(env.deps, {
+      from: PHONE,
+      text: "Recuerda prefiero respuestas por puntos",
+      messageId: "m-2",
+    });
+    expect(saved.reply).toContain("No guardé nada");
+    const turn = await handleInboundMessage(env.deps, {
+      from: PHONE,
+      text: QUESTION,
+      messageId: "m-3",
+    });
+    expect(turn.reply).not.toContain("Tengo presente");
+  });
+
+  it("recalls a saved preference in the next answer, only for the same subscriber", async () => {
+    const memory = memoryDouble();
+    const env = await registered();
+    env.deps.memory = memory.port;
+    await handleInboundMessage(env.deps, { from: PHONE, text: "Hola", messageId: "m-1" });
+    const saved = await handleInboundMessage(env.deps, {
+      from: PHONE,
+      text: "Recuérdame que prefiero respuestas por puntos",
+      messageId: "m-2",
+    });
+    expect(saved.reply).toContain("lo recordaré");
+    expect([...memory.bySubject.keys()]).toEqual([`klaimate:subscriber:${env.subscriber.id}`]);
+    expect(JSON.stringify([...memory.bySubject])).not.toMatch(/987\s?654\s?321/);
+
+    const turn = await handleInboundMessage(env.deps, {
+      from: PHONE,
+      text: QUESTION,
+      messageId: "m-3",
+    });
+    expect(turn.reply).toContain("• Según Open-Meteo");
+    expect(
+      replyContractViolations({ kind: "clear", source: "Open-Meteo", text: turn.reply ?? "" }),
+    ).toEqual([]);
+
+    const other = await registerSubscriber(env.deps, {
+      userId: "user-2",
+      phone: "987 111 222",
+      districtName: "Piura",
+      ubigeo: "200101",
+      consentAccepted: true,
+      adultConfirmed: true,
+    });
+    expect(other.data).toBeTruthy();
+    await handleInboundMessage(env.deps, { from: "+51987111222", text: "Hola", messageId: "o-1" });
+    const list = await handleInboundMessage(env.deps, {
+      from: "+51987111222",
+      text: "¿Qué recuerdas?",
+      messageId: "o-2",
+    });
+    expect(list.reply).toContain("No tengo nada guardado");
+  });
+
+  it("refuses sensitive text and warning levels without calling the provider", async () => {
+    const memory = memoryDouble();
+    const env = await registered();
+    env.deps.memory = memory.port;
+    await handleInboundMessage(env.deps, { from: PHONE, text: "Hola", messageId: "m-1" });
+    const phone = await handleInboundMessage(env.deps, {
+      from: PHONE,
+      text: "Recuerda mi número 987 654 321",
+      messageId: "m-2",
+    });
+    const level = await handleInboundMessage(env.deps, {
+      from: PHONE,
+      text: "Recuerda que Piura está en alerta roja",
+      messageId: "m-3",
+    });
+    expect(phone.reply).toContain("No se guardó nada");
+    expect(level.reply).toContain("No guardo avisos");
+    expect(memory.bySubject.size).toBe(0);
+  });
+
+  it("tells the person nothing was saved when the provider is down, and still answers", async () => {
+    const env = await registered();
+    env.deps.memory = memoryDouble("down").port;
+    await handleInboundMessage(env.deps, { from: PHONE, text: "Hola", messageId: "m-1" });
+    const saved = await handleInboundMessage(env.deps, {
+      from: PHONE,
+      text: "Recuerda prefiero respuestas por puntos",
+      messageId: "m-2",
+    });
+    expect(saved.reply).toContain("No pude confirmar la operación");
+    const turn = await handleInboundMessage(env.deps, {
+      from: PHONE,
+      text: QUESTION,
+      messageId: "m-3",
+    });
+    expect(turn.toolNames).toContain("semaforo_y_alertas");
+    expect(env.logs.join("\n")).toContain("assistant_memory_unavailable recall fixture_down");
+  });
+
+  it("after BAJA refuses new memories, still allows OLVIDA, and erases with the subscriber", async () => {
+    const memory = memoryDouble();
+    const env = await registered();
+    env.deps.memory = memory.port;
+    const subject = `klaimate:subscriber:${env.subscriber.id}`;
+    await handleInboundMessage(env.deps, { from: PHONE, text: "Hola", messageId: "m-1" });
+    await handleInboundMessage(env.deps, {
+      from: PHONE,
+      text: "Recuerda prefiero respuestas por puntos",
+      messageId: "m-2",
+    });
+    await handleInboundMessage(env.deps, { from: PHONE, text: "BAJA", messageId: "m-3" });
+    const blocked = await handleInboundMessage(env.deps, {
+      from: PHONE,
+      text: "Recuerda viajo los lunes",
+      messageId: "m-4",
+    });
+    expect(blocked.reply).toContain("dados de baja");
+    expect(memory.bySubject.get(subject)?.map((item) => item.text)).toEqual([
+      "prefiero respuestas por puntos",
+    ]);
+
+    const forgot = await handleInboundMessage(env.deps, {
+      from: PHONE,
+      text: "Olvida",
+      messageId: "m-5",
+    });
+    expect(forgot.reply).toContain("borré lo que recordaba");
+    expect(memory.bySubject.has(subject)).toBe(false);
+
+    await memory.port.remember({
+      subject: subject as MemorySubject,
+      kind: "preference",
+      text: "x y z",
+    });
+    env.setNow(new Date(NOW.getTime() + 31 * 24 * 60 * 60 * 1000));
+    expect(await purgeDueSubscribers(env.deps)).toBe(1);
+    expect(memory.bySubject.has(subject)).toBe(false);
+  });
+});
+
+describe("remote erasure retries", () => {
+  it("keeps a due anonymous subject until remote erasure is confirmed", async () => {
+    const env = await registered();
+    const memory = memoryDouble("down");
+    env.deps.memory = memory.port;
+    await handleInboundMessage(env.deps, { from: PHONE, text: "BAJA", messageId: "retry-baja" });
+    env.setNow(new Date(NOW.getTime() + 31 * 24 * 60 * 60 * 1000));
+    expect(await purgeDueSubscribers(env.deps)).toBe(0);
+    expect(await env.store.listErasureDue(env.deps.clock.now())).toHaveLength(1);
+    expect(env.logs.join("\n")).toContain("assistant_memory_erasure_pending");
+    env.deps.memory = memoryDouble().port;
+    expect(await purgeDueSubscribers(env.deps)).toBe(1);
+    expect(await env.store.listErasureDue(env.deps.clock.now())).toEqual([]);
+  });
+});
+
+it("preserves every sourced sentence when applying and correcting the saved format", async () => {
+  const env = await registered();
+  env.deps.memory = memoryDouble().port;
+  await handleInboundMessage(env.deps, { from: PHONE, text: "Hola", messageId: "fmt-hello" });
+  const plain = await handleInboundMessage(env.deps, {
+    from: PHONE,
+    text: QUESTION,
+    messageId: "fmt-before",
+  });
+  await handleInboundMessage(env.deps, {
+    from: PHONE,
+    text: "RECUERDA prefiero respuestas por puntos",
+    messageId: "fmt-save",
+  });
+  const points = await handleInboundMessage(env.deps, {
+    from: PHONE,
+    text: QUESTION,
+    messageId: "fmt-points",
+  });
+  expect(points.reply).toContain("\n• Consulta SENAMHI e INDECI/COEN");
+  expect(points.reply?.replace(/^• /gm, "").replace(/\n/g, " ")).toBe(plain.reply);
+  await handleInboundMessage(env.deps, {
+    from: PHONE,
+    text: "RECUERDA prefiero respuestas en párrafos",
+    messageId: "fmt-correct",
+  });
+  const corrected = await handleInboundMessage(env.deps, {
+    from: PHONE,
+    text: QUESTION,
+    messageId: "fmt-after",
+  });
+  expect(corrected.reply).toBe(plain.reply);
+});
+
+it.runIf(process.env.RECORD_MEMORY_DEMO === "1")(
+  "recorded real WhatsApp handler workflow with local fixtures",
+  async () => {
+    const env = await registered();
+    env.deps.memory = memoryDouble().port;
+    await handleInboundMessage(env.deps, { from: PHONE, text: "Hola", messageId: "demo-hello" });
+    console.log(
+      "KlAimate · flujo real del manejador de mensajes\nDatos de clima y proveedor de memoria: fixtures locales. No se envían mensajes a WhatsApp.\n",
+    );
+    let sequence = 0;
+    const turn = async (text: string) => {
+      console.log(`\nPERSONA > ${text}`);
+      await new Promise((resolve) => setTimeout(resolve, 700));
+      const result = await handleInboundMessage(env.deps, {
+        from: PHONE,
+        text,
+        messageId: `demo-${++sequence}`,
+      });
+      console.log(`KLAIMATE > ${result.reply}\n`);
+      await new Promise((resolve) => setTimeout(resolve, 2200));
+      return result;
+    };
+    const before = await turn(QUESTION);
+    await turn("RECUERDA prefiero respuestas por puntos");
+    const remembered = await turn(QUESTION);
+    expect(remembered.reply).toContain("\n• ");
+    expect(remembered.reply?.replace(/^• /gm, "").replace(/\n/g, " ")).toBe(before.reply);
+    await turn("QUÉ RECUERDAS");
+    await turn("RECUERDA prefiero respuestas en párrafos");
+    const corrected = await turn(QUESTION);
+    expect(corrected.reply).toBe(before.reply);
+    await turn("OLVIDA");
+    const forgotten = await turn("QUÉ RECUERDAS");
+    expect(forgotten.reply).toContain("No tengo nada guardado");
+    console.log(
+      "Verificado: guardar → aplicar formato → revisar → corregir → borrar.\nLas fuentes, horas y advertencias se conservan completas.",
+    );
+  },
+  40000,
+);
+
+it("introduces optional remembered formatting in the actual first greeting", async () => {
+  const env = await registered();
+  env.deps.memory = memoryDouble().port;
+  const result = await handleInboundMessage(env.deps, {
+    from: PHONE,
+    text: "Hola",
+    messageId: "discover-memory",
+  });
+  expect(result.reply).toContain("RECUERDA prefiero respuestas por puntos");
+  expect(result.reply).toContain("QUÉ RECUERDAS o borra con OLVIDA");
 });

@@ -4,10 +4,12 @@ import {
   classifyInboundKeyword,
   maskPhone,
   normalizePhone,
+  parseMemoryCommand,
   redactPhones,
 } from "@emergency-map/domain/rules";
 import { verifyZavuSignature } from "@emergency-map/domain/rules";
 import { isGreetingOnly, runAgent } from "./agent";
+import { handleMemoryCommand, recallForTurn, formatRememberedReply } from "./assistant-memory";
 import type { MessagingDeps } from "./deps";
 import { dispatchDue } from "./dispatch";
 import { enqueueOutbound } from "./follow-up";
@@ -69,6 +71,15 @@ export async function handleInboundMessage(
   }
 
   const fresh = (await deps.store.findSubscriberById(subscriber.id)) ?? subscriber;
+  // Seeing and erasing memory stays available after BAJA; saving something new does not.
+  const memoryCommand = parseMemoryCommand(input.text);
+  if (memoryCommand && (fresh.notificationsEnabled || memoryCommand.kind !== "remember")) {
+    const reply = await handleMemoryCommand(deps, fresh, memoryCommand);
+    await sendReply(deps, fresh, reply, `reply:${input.messageId}`);
+    await dispatchDue(deps);
+    return { reply, matched: true, toolNames: [] };
+  }
+
   if (!fresh.notificationsEnabled) {
     const reply =
       "Tus avisos están dados de baja. Escribe ALTA para volver a recibirlos. La baja anterior sigue en pie hasta entonces.";
@@ -77,7 +88,10 @@ export async function handleInboundMessage(
     return { reply, matched: true, toolNames: [] };
   }
 
-  const welcome = deps.welcomeText ?? WELCOME_MESSAGE;
+  let welcome = deps.welcomeText ?? WELCOME_MESSAGE;
+  if (deps.memory)
+    welcome +=
+      "\n\n¿Prefieres leer por puntos? Escribe RECUERDA prefiero respuestas por puntos. Revisa con QUÉ RECUERDAS o borra con OLVIDA.";
   const firstContact = subscriber.verificationStatus === "pending";
   if (firstContact && isGreetingOnly(input.text)) {
     await sendReply(deps, fresh, welcome, `reply:${input.messageId}`);
@@ -85,12 +99,14 @@ export async function handleInboundMessage(
     return { reply: welcome, matched: true, toolNames: [] };
   }
 
+  const remembered = await recallForTurn(deps, fresh);
   const turn = await runAgent(deps, {
     text: input.text,
     homeDistrictName: fresh.homeDistrictName,
     homeUbigeo: fresh.homeUbigeo,
   });
-  const reply = firstContact ? `${welcome}\n\n${turn.reply}` : turn.reply;
+  const answer = formatRememberedReply(turn.reply, remembered);
+  const reply = firstContact ? `${welcome}\n\n${answer}` : answer;
   await persistTurn(deps, fresh, reply, turn, input.messageId);
   await dispatchDue(deps);
   return { reply, matched: true, toolNames: turn.toolNames };

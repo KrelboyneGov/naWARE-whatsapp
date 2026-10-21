@@ -1,0 +1,52 @@
+
+ RUN  v4.1.12 /home/cueva/projects/atomic-team-prs/naWARE-whatsapp/packages/application
+
+KlAimate · flujo real del manejador de mensajes
+Datos de clima y proveedor de memoria: fixtures locales. No se envían mensajes a WhatsApp.
+
+
+PERSONA > Planeo viajar a Piura el martes, ¿todo bien?
+-------------------KLAIMATE > Según Open-Meteo, con datos de las 18:30 de hoy, Piura no tiene alertas de lluvia fuertes para martes (sin_informacion). El pronóstico puede cambiar, así que revisa de nuevo antes de salir. Consulta SENAMHI e INDECI/COEN si aparece un aviso nuevo. La decisión es tuya. Dato factual: No hay un aviso vigente registrado para esa zona.
+
+
+PERSONA > RECUERDA prefiero respuestas por puntos
+KLAIMATE > Listo, lo recordaré en próximas conversaciones: «prefiero respuestas por puntos». Es lo que me pediste recordar, no un aviso. Escribe QUÉ RECUERDAS para verlo u OLVIDA para borrarlo.
+
+
+PERSONA > Planeo viajar a Piura el martes, ¿todo bien?
+KLAIMATE > • Según Open-Meteo, con datos de las 18:30 de hoy, Piura no tiene alertas de lluvia fuertes para martes (sin_informacion).
+• El pronóstico puede cambiar, así que revisa de nuevo antes de salir.
+• Consulta SENAMHI e INDECI/COEN si aparece un aviso nuevo.
+• La decisión es tuya.
+• Dato factual: No hay un aviso vigente registrado para esa zona.
+
+
+PERSONA > QUÉ RECUERDAS
+KLAIMATE > Esto es lo que recuerdo de nuestras conversaciones:
+• prefiero respuestas por puntos
+Es lo que me pediste recordar, no un aviso. Escribe OLVIDA para borrarlo todo.
+
+
+PERSONA > RECUERDA prefiero respuestas en párrafos
+KLAIMATE > Listo, lo recordaré en próximas conversaciones: «prefiero respuestas en párrafos». Es lo que me pediste recordar, no un aviso. Escribe QUÉ RECUERDAS para verlo u OLVIDA para borrarlo.
+
+
+PERSONA > Planeo viajar a Piura el martes, ¿todo bien?
+KLAIMATE > Según Open-Meteo, con datos de las 18:30 de hoy, Piura no tiene alertas de lluvia fuertes para martes (sin_informacion). El pronóstico puede cambiar, así que revisa de nuevo antes de salir. Consulta SENAMHI e INDECI/COEN si aparece un aviso nuevo. La decisión es tuya. Dato factual: No hay un aviso vigente registrado para esa zona.
+
+
+PERSONA > OLVIDA
+KLAIMATE > Listo, borré lo que recordaba de nuestras conversaciones. Tus avisos siguen igual; para dejar de recibirlos escribe BAJA.
+
+
+PERSONA > QUÉ RECUERDAS
+KLAIMATE > No tengo nada guardado de nuestras conversaciones. Escribe RECUERDA y tu preferencia para guardar algo.
+
+Verificado: guardar → aplicar formato → revisar → corregir → borrar.
+Las fuentes, horas y advertencias se conservan completas.
+·
+
+ Test Files  1 passed (1)
+      Tests  1 passed | 19 skipped (20)
+   Start at  23:48:30
+   Duration  23.47s (transform 101ms, setup 0ms, import 146ms, tests 23.25s, environment 0ms)

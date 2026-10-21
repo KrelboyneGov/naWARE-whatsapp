@@ -1,5 +1,6 @@
 import type {
   IClock,
+  IConversationMemoryPort,
   IEventRepository,
   IForecastPort,
   IIdGenerator,
@@ -34,4 +35,6 @@ export interface MessagingDeps {
   templatesEnabled: boolean;
   maxAttempts: number;
   minFollowUpIntervalMs: number;
+  /** Optional Atomic Memory. Absent means disabled: replies are the same, nothing is stored. */
+  memory?: IConversationMemoryPort;
 }

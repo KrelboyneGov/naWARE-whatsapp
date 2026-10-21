@@ -108,3 +108,57 @@ export interface ILog {
   info(message: string): void;
   error(message: string): void;
 }
+
+/**
+ * Memory subject of one subscriber. Built only on the server from a subscriber row that was
+ * found by the verified phone hash or the signed-in user id, never from a request field or
+ * model output.
+ */
+export type MemorySubject = string & { readonly __brand: "MemorySubject" };
+
+/** What the assistant may remember. Never a warning level: those come from the sources. */
+export type RememberedKind = "preference";
+
+export interface RememberedItem {
+  id: string;
+  kind: RememberedKind;
+  /** Text without the kind prefix, as the person or the assistant phrased it. */
+  text: string;
+  savedAt: string | null;
+}
+
+export type MemoryReadResult =
+  | { status: "ok"; items: RememberedItem[] }
+  | { status: "disabled" }
+  | { status: "unavailable"; reason: string };
+
+export type MemoryWriteResult =
+  | { status: "saved" }
+  | { status: "disabled" }
+  | { status: "unavailable"; reason: string };
+
+export type MemoryDeleteResult =
+  | { status: "deleted"; count: number }
+  | { status: "not_found" }
+  | { status: "disabled" }
+  | { status: "unavailable"; reason: string };
+
+/**
+ * Optional conversation memory (Atomic Memory). Every call is bounded and never throws: a
+ * provider failure comes back as `unavailable` so the WhatsApp reply still goes out.
+ */
+export interface IConversationMemoryPort {
+  recall(input: {
+    subject: MemorySubject;
+    query: string;
+    limit: number;
+  }): Promise<MemoryReadResult>;
+  list(input: { subject: MemorySubject }): Promise<MemoryReadResult>;
+  remember(input: {
+    subject: MemorySubject;
+    kind: RememberedKind;
+    text: string;
+  }): Promise<MemoryWriteResult>;
+  forget(input: { subject: MemorySubject; id: string }): Promise<MemoryDeleteResult>;
+  forgetAll(input: { subject: MemorySubject }): Promise<MemoryDeleteResult>;
+}

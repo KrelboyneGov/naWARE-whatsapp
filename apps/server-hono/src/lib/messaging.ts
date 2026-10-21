@@ -10,6 +10,7 @@ import { createFieldCipher } from "@emergency-map/domain/rules";
 import { createDatabaseClient } from "@emergency-map/infra-db/client";
 import { MessagingRepository } from "@emergency-map/infra-db/repositories";
 import {
+  createAtomicMemory,
   createOpenAiCompatibleLlm,
   createOpenMeteoForecast,
   createZavuNotifier,
@@ -53,6 +54,10 @@ export function getMessagingDeps(): MessagingDeps {
         model: env.LLM_MODEL,
       })
     : createDeterministicClimateLlm();
+  const memory =
+    env.ATOMICMEMORY_API_URL && env.ATOMICMEMORY_API_KEY
+      ? createAtomicMemory({ apiUrl: env.ATOMICMEMORY_API_URL, apiKey: env.ATOMICMEMORY_API_KEY })
+      : undefined;
 
   cached = {
     store: messagingStore(),
@@ -84,6 +89,7 @@ export function getMessagingDeps(): MessagingDeps {
     maxAttempts: 3,
     minFollowUpIntervalMs: 12 * 60 * 60 * 1000,
     welcomeText,
+    ...(memory ? { memory } : {}),
   };
   return cached;
 }
