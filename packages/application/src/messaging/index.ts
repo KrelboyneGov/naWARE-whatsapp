@@ -7,3 +7,4 @@ export { dispatchDue, isWindowOpen } from "./dispatch";
 export { runAgent, createDeterministicClimateLlm, callAgentTool, AGENT_TOOLS } from "./agent";
 export { composeCitizenReply, guardReply } from "./compose";
 export { readAlerts, readHistory, readCommunity } from "./zone";
+export { disabledConversationMemory, memorySubjectFor } from "./assistant-memory";

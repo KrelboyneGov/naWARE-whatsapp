@@ -2,6 +2,7 @@ import type { NotificationJob, Subscriber } from "@emergency-map/domain/schemas"
 import { renderTemplate, type WhatsAppTemplateName } from "@emergency-map/domain/schemas";
 import { semaphoreChanged, semaphoreRank } from "@emergency-map/domain/rules";
 import type { MessagingDeps } from "./deps";
+import { memoryOf, memorySubjectFor } from "./assistant-memory";
 import { isWindowOpen } from "./dispatch";
 import { loadAlerts, formatDayLima, formatTimeLima } from "./zone";
 
@@ -161,6 +162,7 @@ async function enqueueZoneUpdate(
 export async function purgeDueSubscribers(deps: MessagingDeps): Promise<number> {
   const now = deps.clock.now();
   const due = await deps.store.listErasureDue(now);
+  let completed = 0;
   for (const subscriber of due) {
     const tombstone = `erased:${subscriber.id}`;
     await deps.store.updateSubscriber(subscriber.id, {
@@ -169,11 +171,19 @@ export async function purgeDueSubscribers(deps: MessagingDeps): Promise<number> 
       homeDistrictName: "anonimizado",
       homeUbigeo: null,
       notificationsEnabled: false,
-      erasureDueAt: null,
+      erasureDueAt: subscriber.erasureDueAt,
       updatedAt: now,
     });
     await deps.store.deleteSubscriberMemory(subscriber.id);
+    const remote = await memoryOf(deps).forgetAll({ subject: memorySubjectFor(subscriber) });
+    if (remote.status === "unavailable") {
+      // Keep the due date so the next cron retries remote erasure with the same subject.
+      deps.log.error(`assistant_memory_erasure_pending ${subscriber.id} ${remote.reason}`);
+      continue;
+    }
+    await deps.store.updateSubscriber(subscriber.id, { erasureDueAt: null, updatedAt: now });
+    completed += 1;
   }
-  deps.log.info(`erasure_completed ${due.length}`);
-  return due.length;
+  deps.log.info(`erasure_completed ${completed}`);
+  return completed;
 }
